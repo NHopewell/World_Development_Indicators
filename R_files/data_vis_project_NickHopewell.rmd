@@ -1,0 +1,2308 @@
+---
+title: "World Progress and Development Indicators"
+subtitle: "Data Visualization (AMOD 5430)"
+author: "Nicholas Hopewell"
+date: "`r Sys.Date()`"
+output: markdowntemplates::kube
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE, warning=FALSE}
+library(knitr)
+library(rmdformats)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=FALSE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=6)
+
+```
+
+```{r, echo=FALSE, cache=TRUE}
+options(scipen = 9999)
+#############################
+##### Data vis project  #####
+##### Part 1            #####
+##### Nicholas Hopewell #####
+##### 0496633           #####
+#############################
+library(tidyverse)
+library(ggthemes)
+library(gridExtra)
+library(scales)
+library(ggplot2)
+setwd("C:/Desktop/Data vis project/Data_vis_project/world bank data/world development indicators")
+### >>> Income brackets - countries - according to World Bank <<<
+
+low.income <- c("Afghanistan", "Benin", "Burkina Faso", "Burundi", 
+                "Central African Republic", "Chad",  "Comoros", 
+                "Congo Dem. Rep.", "Eritrea", "Ethiopia", "Gambia, The", 
+                "Guinea", "Guinea-Bissau", "Haiti", "Korea Dem. People's Rep.", 
+                "Liberia", "Madagascar", "Malawi", "Mali", "Mozambique", 
+                "Nepal", "Niger", "Rwanda", "Senegal", "Sierra Leone", 
+                "Somalia", "South Sudan", "Tanzania", "Togo", 
+                "Uganda", "Zimbabwe")
+
+uprMid.income <- c("Albania", "Algeria", "American Samoa", "Argentina", 
+                   "Azerbaijan", "Belarus", "Belize", "Bosnia and Herzegovina", 
+                   "Botswana", "Brazil", "Bulgaria", "China", "Colombia", 
+                   "Costa Rica", "Croatia", "Cuba", "Dominica", "Dominican Republic",
+                   "Ecuador", "Equatorial Guinea", "Fiji", "Gabon", "Grenada", 
+                   "Guyana", "Iran, Islamic Rep.", "Iraq", "Jamaica", "Kazakhstan", 
+                   "Lebanon", "Libya", "Macedonia, FYR", "Malaysia", "Maldives", 
+                   "Marshall Islands", "Mauritius", "Mexico", "Montenegro", 
+                   "Namibia", "Nauru", "Panama", "Paraguay", "Peru", "Romania", 
+                   "Russian Federation", "Samoa", "Serbia", "South Africa", 
+                   "St. Lucia", "St. Vincent and the Grenadines", "Suriname", 
+                   "Thailand", "Tonga", "Turkey", "Turkmenistan", "Tuvalu", 
+                   "Venezuela, RB")
+
+high.income <- c("Andorra", "Antigua and Barbuda", "Aruba", "Australia", 
+                 "Austria", "Bahamas, The", "Bahrain", "Barbados", "Belgium", 
+                 "Bermuda", "British Virgin Islands", "Brunei Darussalam", "Canada",
+                 "Cayman Islands", "Channel Islands", "Chile", "Curacao", "Cyprus", 
+                 "Czech Republic", "Denmark", "Estonia", "Faroe Islands", "Finland", 
+                 "France", "French Polynesia", "Germany", "Gibraltar", "Greece",
+                 "Greenland", "Guam", "Hong Kong SAR, China", "Hungary", "Iceland", 
+                 "Ireland", "Isle of Man", "Israel", "Italy", "Japan", "Korea, Rep.", 
+                 "Kuwait", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", 
+                 "Macao SAR, China", "Malta", "Monaco", "Netherlands", "New Caledonia", 
+                 "New Zealand", "Northern Mariana Islands", "Norway", "Oman", "Palau", 
+                 "Poland", "Portugal", "Puerto Rico", "Qatar", "San Marino", "Saudi Arabia", 
+                 "Seychelles", "Singapore", "Sint Maarten (Dutch part)", "Slovak Republic", 
+                 "Slovenia", "Spain", "St. Kitts and Nevis", "St. Martin (French part)",
+                 "Sweden", "Switzerland", "Trinidad and Tobago", "Turks and Caicos Islands", 
+                 "United Arab Emirates","United Kingdom", "United States", "Uruguay", 
+                 "Virgin Islands (U.S.)")
+
+lowMid.income <- c("Angola", "Armenia", "Bangladesh", "Bhutan", "Bolivia", "Cabo Verde",
+                   "Cambodia", "Cameroon", "Congo, Rep.", "Cote d'Ivoire", "Djibouti", 
+                   "Egypt, Arab Rep.", "El Salvador", "Georgia", "Ghana", "Guatemala", 
+                   "Honduras", "India", "Indonesia", "Jordan", "Kenya", "Kiribati", 
+                   "Kosovo", "Kyrgyz Republic", "Lao PDR", "Lesotho", "Mauritania", 
+                   "Micronesia, Fed. Sts.", "Moldova", "Mongolia", "Morocco", "Myanmar", 
+                   "Nicaragua", "Nigeria", "Pakistan", "Papua New Guinea", "Philippines", 
+                   "Sao Tome and Principe", "Solomon Islands", "Sri Lanka", "Sudan", 
+                   "Swaziland", "Syrian Arab Republic", "Tajikistan", "Timor-Leste", 
+                   "Tunisia", "Ukraine", "Uzbekistan", "Vanuatu", "Vietnam", "West Bank and Gaza", 
+                   "Yemen, Rep.", "Zambia")
+
+
+
+#### >>> World regions <<<
+
+south.asia <- c("Afghanistan", "Bangladesh", "Bhutan", "India", "Maldives", "Nepal", 
+                "Pakistan", "Sri Lanka")
+        
+eu.centralAsia <- c("Albania", "Andorra", "Armenia", "Austria", "Azerbaijan", "Belarus", 
+                    "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Channel Islands", 
+                    "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Faroe Islands", 
+                    "Finland", "France", "Georgia", "Germany", "Gibraltar", "Greece", "Greenland", 
+                    "Hungary", "Iceland", "Ireland", "Isle of Man", "Italy", "Kazakhstan", "Kosovo", 
+                    "Kyrgyz Republic", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", 
+                    "Macedonia, FYR", "Moldova", "Monaco", "Montenegro", "Netherlands", "Norway", 
+                    "Poland", "Portugal", "Romania", "Russian Federation", 
+                    "San Marino", "Serbia", "Slovak Republic", "Slovenia", "Spain", "Sweden", 
+                    "Switzerland", "Tajikistan", "Turkey", "Turkmenistan", "Ukraine", "United Kingdom", 
+                    "Uzbekistan")
+
+midEast.northAfr <- c("Algeria", "Bahrain", "Djibouti", "Egypt, Arab Rep.", "Iran, Islamic Rep.", 
+                      "Iraq", "Israel", "Jordan", "Kuwait", "Lebanon", "Libya", "Malta", 
+                      "Morocco", "Oman", "Qatar", "Saudi Arabia", "Syrian Arab Republic", "Tunisia", 
+                      "United Arab Emirates", "West Bank and Gaza", "Yemen, Rep.")
+        
+eastAsia.pacific <- c("American Samoa", "Australia", "Brunei Darussalam", "Cambodia", "China", 
+                      "Fiji", "French Polynesia", "Guam", "Hong Kong SAR, China", "Indonesia", 
+                      "Japan", "Kiribati", "Korea, Dem. People's Rep.", "Korea, Rep.", 
+                      "Lao PDR", "Macao SAR, China", "Malaysia", "Marshall Islands", 
+                      "Micronesia, Fed. Sts.", "Mongolia", "Myanmar", "Nauru", "New Caledonia", 
+                      "New Zealand", "Northern Mariana Islands", "Palau", "Papua New Guinea", 
+                      "Philippines", "Samoa", "Singapore", "Solomon Islands", "Thailand", 
+                      "Timor-Leste", "Tonga", "Tuvalu", "Vanuatu", "Vietnam")
+        
+subSaharan.africa <- c("Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde", 
+                       "Cameroon", "Central African Republic", "Chad", "Comoros", "Congo, Dem. Rep.",
+                       "Congo, Rep.", "Cote d'Ivoire", "Equatorial Guinea", "Eritrea", "Ethiopia", 
+                       "Gabon", "Gambia, The", "Ghana", "Guinea", "Guinea-Bissau", "Kenya", "Lesotho", 
+                       "Liberia", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", 
+                       "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", 
+                       "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", 
+                       "Sudan", "Swaziland", "Tanzania", "Togo", "Uganda", "Zambia", "Zimbabwe")
+        
+latinAm.caribbean <- c("Antigua and Barbuda", "Argentina", "Aruba", "Bahamas, The", "Barbados", 
+                       "Belize", "Bolivia", "Brazil", "British Virgin Islands", "Cayman Islands", 
+                       "Chile", "Colombia", "Costa Rica", "Cuba", "Curacao", "Dominica", "Dominican Republic",
+                       "Ecuador", "El Salvador", "Grenada", "Guatemala", "Guyana", "Haiti", "Honduras",
+                       "Jamaica", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Puerto Rico", 
+                       "Sint Maarten (Dutch part)", "St. Kitts and Nevis", "St. Lucia", 
+                       "St. Martin (French part)", "St. Vincent and the Grenadines", "Suriname", 
+                       "Trinidad and Tobago", "Turks and Caicos Islands", "Uruguay", "Venezuela, RB", 
+                       "Virgin Islands (U.S.)")
+        
+north.America <- c("Bermuda", "Canada", "United States")
+        
+
+#### >>> Global development data sets: <<<
+
+directory <- setwd("C:/Desktop/Data vis project/Data_vis_project/world bank data/world development indicators")
+
+file.paths <- c("/access to essentials", "/birth, fertility and growth", "/corruption", "/disease",
+               "/education", "/employment", "/environmental sustainability and pollution", "/gender",
+               "/inequality", "/natural disaster")
+
+
+list.paths <- c()
+# automatically generate file paths and store in one object
+
+for (path in file.paths) {
+        this.path <- paste0(directory,path)
+        list.paths[path] <- this.path
+}
+
+#print(as.list(list.paths))
+list.paths <- as.list(list.paths)
+
+### world populations + more
+
+root.path <- "C:/Desktop/Data vis project/Data_vis_project/world bank data"
+world.data <- read.csv(paste(root.path, paste0("world populations", ".csv"), sep = "/"),
+                           header = TRUE)
+
+world.pop.data <- world.data[3313:3496, ]
+GINI.index.data <- world.data[737:920, ]
+# income share held by highest 10%
+income.top10.data <- world.data[737:920, ]
+
+
+## rename columns
+
+
+
+
+
+### Access to essentials
+
+essentials.path <- list.paths[[1]]
+
+essentials.sets <- c("access to electricity")
+
+essentials.data <- read.csv(paste(essentials.path, paste0(essentials.sets, ".csv"), sep = "/"), 
+                            header = TRUE, na.strings = "..")
+
+# rename columns
+
+# colnames(essentials.data)
+essentials.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", "1990", "2000", 
+                      seq(2008, 2017))
+
+names(essentials.data) <- essentials.names
+
+
+
+
+
+### birth, fertility and growth
+
+birth.path <- list.paths[[2]]
+
+birth.growth.sets <- c("Births attended by skilled health staff (% of total)", 
+                       "crude birth rate (per 1000 people)",
+                      "fertility rates (all years since 1960)",
+                      "Prevalence of stunting, height for age (% of children under 5)")
+
+births.professional.data <- read.csv(paste(birth.path, paste0(birth.growth.sets[1], ".csv"), sep = "/"), 
+                                     header = TRUE, na.strings = "..")
+birth.rate.data <- read.csv(paste(birth.path, paste0(birth.growth.sets[2], ".csv"), sep = "/"), 
+                            header = TRUE, na.strings = "..")
+fertility.data <- read.csv(paste(birth.path, paste0(birth.growth.sets[3], ".csv"), sep = "/"), 
+                           header = TRUE, na.strings = "..")
+stunting.data <- read.csv(paste(birth.path, paste0(birth.growth.sets[4], ".csv"), sep = "/"), 
+                          header = TRUE, na.strings = "..")
+
+# rename columns 
+
+#colnames(births.professional.data)
+birth.names = c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+names(births.professional.data) <- birth.names
+
+#colnames(birth.rate.data)
+birth.rate.names = c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(birth.rate.data) <- birth.rate.names
+
+#colnames(fertility.data)
+fertility.names = c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1960, 2017))
+names(fertility.data) <- fertility.names
+
+#colnames(stunting.data)
+stunting.names = c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(stunting.data) <- stunting.names
+
+
+
+
+
+
+### corruption
+
+corruption.path <- list.paths[[3]]
+
+corruption.sets <- c("corruption indicators all over the world (2002 - 2012)")
+
+corruption.data <- read.csv(paste(corruption.path, paste0(corruption.sets, ".csv"), sep = "/"), 
+                            header = TRUE)
+
+# rename columns
+
+#colnames(corruption.data)
+
+old.cols <- colnames(corruption.data[5:ncol(corruption.data)])
+
+clean_cols <- function(columns) {
+        
+        columns <- gsub("[..]", ".", columns)
+        columns <- gsub('.{4}$', '', columns)
+        columns <- gsub('â..', "'", columns)
+        columns[startsWith(columns, "St")] <- gsub('.{2}$', '', columns[startsWith(columns, "St")])
+        columns[startsWith(columns, "St")] <- gsub("[..]", ".", columns[startsWith(columns, "St")])
+        
+        return (columns)
+}
+
+# call function
+new.cols <- clean_cols(old.cols)
+
+
+
+for (i in 1:length(new.cols)) {
+        if (startsWith(new.cols[i], "St") == TRUE) {
+                new.cols[i]<- gsub('[.]', ' ', new.cols[i])
+        } else {
+                new.cols[i] <- gsub('[..]', ' ', new.cols[i])
+        }
+}
+
+for (i in 1:length(new.cols)) {
+        if (endsWith(new.cols[i], " ") == TRUE) {
+                new.cols[i]<- trimws(new.cols[i])
+        }
+}
+
+
+for (i in 1:length(new.cols)) {
+        if (startsWith(new.cols[i], "St") == TRUE) {
+                new.cols[i]<- sub('  ', '.', new.cols[i])
+        }
+}
+
+### fix remaining special cases
+
+
+
+
+
+
+
+### disease
+
+disease.path <- list.paths[[4]]
+
+disease.sets <- c("children (0-14) living with HIV", "children (0-14) newly infected with HIV")
+
+child.hiv.data <- read.csv(paste(disease.path, paste0(disease.sets[1], ".csv"), sep = "/"), 
+                           header = TRUE, na.strings = "..")
+new.hiv.data <- read.csv(paste(disease.path, paste0(disease.sets[2], ".csv"), sep = "/"), 
+                         header = TRUE, na.strings = "..")
+
+## rename columns 
+
+#colnames(child.hiv.data)
+child.hiv.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(child.hiv.data) <- child.hiv.names
+
+#colnames(new.hiv.data)
+names(new.hiv.data) <- child.hiv.names
+
+
+
+
+
+
+### Education
+
+education.path <- list.paths[[5]]
+
+ed.sets <- c("education expenditure % of GNI", "female preprimary school enrollment (% gross)", 
+            "female primary school enrollment (% gross)", "female secondary school enrollment (% gross)", 
+            "female tertiary school enrollment (% gross)", "male preprimary school enrollment (% gross)",
+            "male primary school enrollment (% gross)", "male secondary school enrollment (% gross)",
+            "male tertiary school enrollment (% gross)")
+
+
+ed.expend.data <- read.csv(paste(education.path, paste0(ed.sets[1], ".csv"), sep = "/"), 
+                           header = TRUE, na.strings = "..")
+
+# fix encoding:
+ed.expend.data$Country.Name <- sub("â???T", "'", ed.expend.data$Country.Name)
+
+fem.pre.data <- read.csv(paste(education.path, paste0(ed.sets[2], ".csv"), sep = "/"), 
+                         header = TRUE, na.strings = "..")
+fem.pre.data$Country.Name <- sub("â???T", "'", fem.pre.data$Country.Name)
+
+fem.primary.data <- read.csv(paste(education.path, paste0(ed.sets[3], ".csv"), sep = "/"), 
+                             header = TRUE, na.strings = "..")
+fem.primary.data $Country.Name <- sub("â???T", "'", fem.primary.data$Country.Name)
+
+fem.secondary.data <- read.csv(paste(education.path, paste0(ed.sets[4], ".csv"), sep = "/"), 
+                               header = TRUE, na.strings = "..")
+fem.secondary.data$Country.Name <- sub("â???T", "'", fem.secondary.data$Country.Name)
+
+fem.tertiary.data <- read.csv(paste(education.path, paste0(ed.sets[5], ".csv"), sep = "/"), 
+                              header = TRUE, na.strings = "..")
+fem.tertiary.data$Country.Name <- sub("â???T", "'", fem.tertiary.data$Country.Name)
+
+
+## COMPARE TERTIARY EDUCATION FEMALES TO MALES IN NORTH AMERICA
+
+male.pre.data <- read.csv(paste(education.path, paste0(ed.sets[6], ".csv"), sep = "/"), 
+                          header = TRUE, na.strings = "..")
+male.primary.data <- read.csv(paste(education.path, paste0(ed.sets[7], ".csv"), sep = "/"), 
+                              header = TRUE, na.strings = "..")
+male.secondary.data <- read.csv(paste(education.path, paste0(ed.sets[8], ".csv"), sep = "/"), 
+                                header = TRUE, na.strings = "..")
+male.tertiary.data <- read.csv(paste(education.path, paste0(ed.sets[9], ".csv"), sep = "/"), 
+                               header = TRUE, na.strings = "..")
+        
+
+## rename columns 
+
+# colnames(ed.expend.data)
+ed.expend.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", "1990", "2000", 
+                     seq(2008, 2017))
+names(ed.expend.data) <- ed.expend.names
+
+# colnames(fem.pre.data)
+fem.pre.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(fem.pre.data) <- fem.pre.names
+
+# colnames(fem.primary.data)
+fem.primary.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(fem.primary.data) <- fem.primary.names
+
+# colnames(fem.secondary.data)
+fem.secondary.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(fem.secondary.data) <- fem.secondary.names
+
+# colnames(fem.tertiary.data)
+fem.tertiary.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(fem.tertiary.data) <- fem.tertiary.names
+
+# colnames(male.pre.data)
+male.pre.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(male.pre.data) <- male.pre.names 
+ 
+# colnames(male.primary.data)
+male.primary.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(male.primary.data) <- male.primary.names 
+
+# colnames(male.secondary.data)
+male.secondary.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(male.secondary.data) <- male.secondary.names
+
+# colnames(male.tertiary.data)
+male.tertiary.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(male.tertiary.data) <- male.tertiary.names
+
+
+
+
+
+
+### employment
+
+employment.path <- list.paths[[6]]
+
+employment.sets <- c("Ratio of female to male labor force participation %", "unemplyement rates over time")
+
+participation.ratio.data <- read.csv(paste(employment.path, paste0(employment.sets[1], ".csv"), sep = "/"), 
+                                     header = TRUE, na.strings = "..")
+unemploy.rates.data <- read.csv(paste(employment.path, paste0(employment.sets[2], ".csv"), sep = "/"), 
+                                header = TRUE, na.strings = "..")
+
+## rename columns
+
+# colnames(participation.ratio.data)
+participation.ratio.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", 
+                               seq(2008, 2017))
+names(participation.ratio.data) <- participation.ratio.names
+
+# colnames(unemploy.rates.data)
+unemploy.rates.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", "1990", "2000", 
+                          seq(2008, 2017))
+names(unemploy.rates.data) <- unemploy.rates.names
+
+
+
+
+
+
+### environmental sustainability and pollution
+
+# remove sci notation
+options(scipen = 999)
+
+enviro.path <- list.paths[[7]]
+
+enviro.sets <- c("CO2 emissions (metric tons per capita)", "Natural resource depletion (% of GNI)", 
+                "Renewable energy consumption (% of total final energy consumption)", 
+                "total greenhouse gas emissions (kt of CO2 equivalent)")
+        
+co2.emiss.data <- read.csv(paste(enviro.path, paste0(enviro.sets[1], ".csv"), sep = "/"), 
+                           header = TRUE, na.strings = "..")
+resource.depletion.data <- read.csv(paste(enviro.path, paste0(enviro.sets[2], ".csv"), sep = "/"), 
+                                    header = TRUE, na.strings = "..")
+renewable.consume.data <- read.csv(paste(enviro.path, paste0(enviro.sets[3], ".csv"), sep = "/"), 
+                                   header = TRUE, na.strings = "..")
+greenhouse.emiss.data <- read.csv(paste(enviro.path, paste0(enviro.sets[4], ".csv"), sep = "/"), 
+                                  header = TRUE, na.strings = "..")
+
+
+
+
+# colnames(co2.emiss.data)
+co2.emiss.names <- c("Country.Name", "Country.Code", "Series.Name", "Series.Code", seq(1960, 2014))
+names(co2.emiss.data) <- co2.emiss.names
+
+# colnames(resource.depletion.data)
+# delete first row and bad cols
+#resource.depletion.data <- resource.depletion.data[-1, c(seq(1,3), seq(5, 19, 2))]
+resource.depletion.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1968, 2017))
+names(resource.depletion.data) <- resource.depletion.names
+
+
+# colnames(renewable.consume.data)
+#renewable.consume.data <- renewable.consume.data[-1, c(seq(1,3), seq(5, 15, 2))]
+renewable.consume.names <- c("HDI Rank (2015)", "Country", seq(1990, 2010, 5), "2011", "2012")
+names(renewable.consume.data) <- renewable.consume.names
+
+# colnames(greenhouse.emiss.data)
+greenhouse.emiss.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(1980, 2017))
+names(greenhouse.emiss.data) <- greenhouse.emiss.names
+
+
+
+
+
+### Gender
+
+gender.path <- list.paths[[8]]
+
+gender.sets = c("contraceptive prevalence, any methods (% of women ages 15 - 49)", 
+                "Deaths by communicable diseases, ages 15-34, female (% of relevant age group)", 
+                "Female employers (% of female employment)", "Male employers (% of male employment)")
+
+contraceptive.data <- read.csv(paste(gender.path, paste0(gender.sets[1], ".csv"), sep = "/"), 
+                               header = TRUE, na.strings = "..")
+fem.disease.data <- read.csv(paste(gender.path, paste0(gender.sets[2], ".csv"), sep = "/"), 
+                             header = TRUE, na.strings = "..")
+fem.employers.data <- read.csv(paste(gender.path, paste0(gender.sets[3], ".csv"), sep = "/"), 
+                               header = TRUE, na.strings = "..")
+male.employers.data <- read.csv(paste(gender.path, paste0(gender.sets[4], ".csv"), sep = "/"), 
+                                header = TRUE, na.strings = "..")
+
+
+## rename columns
+
+# colnames(contraceptive.data)
+contraceptive.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+names(contraceptive.data) <- contraceptive.names
+
+# colnames(fem.disease.data)
+fem.disease.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+names(fem.disease.data) <- fem.disease.names
+
+# colnames(fem.employers.data)
+fem.employers.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+names(fem.employers.data) <- fem.employers.names
+
+# colnames(male.employers.data)
+male.employers.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+names(male.employers.data) <- male.employers.names
+
+
+
+
+
+### inequality
+
+inequality.path <- list.paths[[9]]
+
+inequality.sets <- c("income share held by highest 10%", "income share held by lowest 20%", 
+                    "poverty headcount ratio at $1.90 a day (% of population)", 
+                    "poverty headcount ratio at $3.20 a day (% of population)",
+                    "poverty headcount ratio at $5.50 a day (% of population)")
+
+#contraceptive.data <- read.csv(paste(inequality.path, paste0(inequality.sets[1], ".csv"), sep = "/"), 
+#                               header = TRUE, na.strings = "..")
+#fem.disease.data <- read.csv(paste(inequality.path, paste0(inequality.sets[2], ".csv"), sep = "/"), 
+#                             header = TRUE, na.strings = "..")
+#fem.employers.data <- read.csv(paste(inequality.path, paste0(inequality.sets[3], ".csv"), sep = "/"), 
+#                               header = TRUE, na.strings = "..")
+#male.employers.data <- read.csv(paste(inequality.path, paste0(inequality.sets[4], ".csv"), sep = "/"), 
+#                                header = TRUE, na.strings = "..")
+
+## rename columns
+
+# colnames(contraceptive.data)
+#contraceptive.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+#names(contraceptive.data) <- contraceptive.names
+
+# colnames(fem.disease.data)
+#fem.disease.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+#names(fem.disease.data) <- fem.disease.names
+
+# colnames(fem.employers.data)
+#fem.employers.names <- c("Series.Name", "Series.Code", "Country.Name", "Country.Code", seq(2008, 2017))
+#names(fem.employers.data) <- fem.employers.names
+
+
+
+
+
+### natural disaster
+
+disaster.path <- list.paths[[10]]
+
+disaster.sets <- c("damage-costs-from-natural-disasters", "internally-DISPLACED-persons-from-disasters",
+                   "number-of-deaths-from-natural-disasters", "number-of-natural-disaster-events")
+
+disaster.damage.data <- read.csv(paste(disaster.path, paste0(disaster.sets[1], ".csv"), sep = "/"), 
+                                 header = TRUE)
+disaster.displaced.data <- read.csv(paste(disaster.path, paste0(disaster.sets[2], ".csv"), sep = "/"), 
+                                    header = TRUE)
+disaster.deaths.data <- read.csv(paste(disaster.path, paste0(disaster.sets[3], ".csv"), sep = "/"), 
+                                 header = TRUE)
+disaster.occurence.data <- read.csv(paste(disaster.path, paste0(disaster.sets[4], ".csv"), sep = "/"), 
+                                    header = TRUE)
+
+## rename columns 
+
+#colnames(disaster.damage.data)
+names(disaster.damage.data)[4] <- "Total.economic.damage"
+#colnames(disaster.displaced.data)
+names(disaster.displaced.data)[4] <- "Internally.displaced.persons"
+#colnames(disaster.deaths.data)
+names(disaster.deaths.data)[4] <- "Total.deaths"
+#colnames(disaster.occurence.data)
+names(disaster.occurence.data)[4] <- "Number.of.disasters"
+
+```
+
+## Nicholas Hopewell - 0496633
+
+This report is intended to present and discuss simple and effective visualizations in an insightful way.  Furthermore, every plot is print-friendly and so interactive visualization techniques were not the goal of the current report. These plots could easily be made interactive - making plots entirely interactive (for brushing, selecting points, etc) is a single line of code with ggplot2 and plotly. Most of the design decisions for the visualizations within this report were inspired by the ideas of Edward Tufte and the teachings of Steven Few. Finally, it is my hope that the data I chose is interesting and understandable to wide audiences. It was an intentional decision to avoid visualizing a very specific data set. Instead, I wanted to do more broad visualizations of many related data sets.  
+
+What this report should convey:
+
+1. Clean and understandable visualizations of world development indicators.
+2. Explainations of various relationships in the data.
+
+What this report does not include:
+
+1. Interactive visualizations.
+2. Complex, rarely-used, and hard to understand visualizations.  
+
+This report will be organized in sections with headings that capture a key insight of the associated vizualization(s).   
+
+ 
+  
+_____________________________________________________________________________________________________   
+
+These graphs may be designed with simplicity in mind, but the actual data wrangling involved was not simple whatsoever. This project was most interesting to me because it forced me to have 'data intuition.' Before producing anything, I needed to know what the data could be molded into, how it could be reshaped, and ultimately, what visualizations were possible with the data I wanted to use. Not a single data file used for this project was in a format which made data visualization easy. Each piece of data had a few interesting stories to tell with some being more interesting than others. I won't go into much detail on the preprocessing specifically as I have attached a total of 9 R script files which include the work. Most of the tidyverse tools were used before visualizing the data. The brunt of the preprocessing work involved lots of reshaping, aggregation and summarizing. There was also quite a lot of text work involved with country and region names as well as a lot of function-writing. All data eventually arrived at a tidy data frame to plot with ggplot2. Simply finding the data I wanted was very difficult. I spend many, many days searching through government records to find data which was complete enough to visualize and interesting enough to get a least a little bit excited about.  
+	
+	
+# Education funding has increased everywhere except North America
+
+```{r, echo=F, cache=T}
+library(dplyr)
+library(ggrepel)
+# function to assign region labels to each country (see first script for regions)
+get.regions <- function (first.col, second.col) {
+        
+        if (is.element(first.col, south.asia)) {
+                second.col = "South Asia"
+        } else if (is.element(first.col, eu.centralAsia)) {
+                second.col = "Europe & Central Asia" 
+        } else if (is.element(first.col, midEast.northAfr)) {
+                second.col = "Middle East & North Africa" 
+        } else if (is.element(first.col, eastAsia.pacific)) {
+                second.col = "East Asia & Pacific" 
+        } else if (is.element(first.col, subSaharan.africa)) {
+                second.col = "Sub-Saharan Africa" 
+        } else if (is.element(first.col, latinAm.caribbean)) {
+                second.col = "Latin America & Caribbean" 
+        } else if (is.element(first.col, north.America)) {
+                second.col = "North America" 
+        } else {
+                second.col = NA
+        }
+        return (second.col)
+}
+
+
+
+### Education
+
+#ed.expend.data
+
+# create empty region column
+ed.expend.data <- ed.expend.data %>%
+                        mutate(region = NA) 
+
+
+# subset out columns and rows not needed
+ed.expend.countries <- ed.expend.data[1:217, c(3, 5:ncol(ed.expend.data)-2, 
+                                               ncol(ed.expend.data))]
+
+# subet further
+ed.expend.countries <- ed.expend.countries[, c(1, 3:ncol(ed.expend.countries))]
+
+# apply the custom function to assign regions
+ed.expend.countries$region <- sapply(
+                                        ed.expend.countries$Country.Name, ed.expend.data$region, 
+                                        FUN = get.regions
+)
+
+# convert region to factor for grouping and aggregation
+ed.expend.countries$region <- as.factor(ed.expend.countries$region)
+
+
+## take the wide data frame and make it long for visualization:
+
+# gather on year columns
+region.long <- ed.expend.countries  %>% 
+        gather(year, ed.expend, `1990`:`2016`) 
+
+# aggregate 
+region.summary <- aggregate(ed.expend ~ year + region, 
+                            FUN=mean, region.long)
+```
+```{r, echo=F, cache = T, fig.width=14, fig.height=7}
+library(dplyr)
+# refined bar plot
+region.summary %>%
+        filter(year == 1990 | year == 2000 | year == 2015) %>%
+        ggplot(., aes(y = ed.expend, 
+                      x = year, fill = region)) +
+                geom_bar(colour="darkgrey", stat = "identity", position = "dodge") +
+                geom_text(
+                           aes(label = sprintf("%.1f", ed.expend), y = ed.expend, group = region),
+                           size = 3, position = position_dodge(width=0.9), vjust=-0.40
+                         ) +
+                labs( 
+                      fill = 'region\n',
+                      x = "\n\nyear\n",
+                      y = "mean expenditure as % of GNI\n(Gross National Income)\n", 
+                      title = "Mean regional education expenditure: \n",
+                      subtitle = "1990, 2000, & 2015\n\n"
+                    ) +
+                theme_tufte() + 
+                theme( 
+                       text = element_text(size=12,  family="Calibri (Body)"),
+                       plot.title = element_text(hjust = 0)
+                     ) +
+                scale_fill_few()
+```
+  
+This plot shows mean education expenditure in different regions of the world for the years 1990, 2000, and 2015. Education expenditure is calculated across regions as the percent of gross national income (GNI) spent funding education. The x-axis including uneven spacing between years was intentional; the onlooker ought to have the ability to compare the most recently available data to a couple recognizable years going relatively far back in recent time. Some valuable information is gained from this plot quite easy with almost no effort or interpretation required from the viewer. This is perhaps one of the greatest strengths of the simple bar plot and surely a contributing factor towards it wide-spread use within analytics. That being said, there are a lot of subtle design choices I have made with this particular bar plot (and a couple others included in this report) which enhance its readability and feel but could easily go unappreciated by an individual who has not studied data visualization formally. I will elaborate on these choices after explaining some take-aways from this plot. 
+  	
+It's clear that overall, average educational expenditure across regions has increased from 1990 to 2000, and again from 2000 to 2015 for most regions. Some regions did not improve from 1990 to 2000, but almost every region in the world improved from 1900 to 2015. Some regions increased educational expenditure more than others, with South Asia making the largest progress over 25 years and Latin America/Caribbean making only small progress. One interesting outcome is that North America is the only region who has not increased their educational expenditure but rather spent a lower percentage of it's GNI on education in 2015 than it did in 1990 and 2000. There are many reasons why this could be the case, reasons which like are rooted in policy and new capitalist economy. It would be unwise to attempt to explain this outcome without more information. It might be interesting to split this region into Canada and America to get a better sense of what factors are influencing these numbers. 
+  	
+The design decisions come directly from Few and Tufte down to the very last detail. The use of white space is maximized by reducing all unnecessary non-data ink. I tend to agree that discrete y-axes can often be left out of a plot without losing any information (assuming the y values are included).  In this case, leaving out the x-axis line is not only okay, but I think advantageous in that it makes it even easier to group the years together. The colour palette used here (and throughout most of these displays) come directly from the recommendations of Few. The actual colours are quite faded and not so deep as per Few's recommendations for bar plots (since bars already have a lot of visual weight to them). Also notice that the number of regions is exactly seven so not to be confusing and hard to visually understand. The recommended but of unique hues according to Few is at eight at most. To make this plot even more print friendly I included a subtle dark grey outline around each bar to make the display pop off the page to the viewer. I also included the actual values above each bar, again for print friendliness. All together, this plot is very clean and elegant. 
+  	
+One very subtle, rarely appreciated, but a very important contributor to the message being portrayed through this plot is the actual height I have chosen for the bars. One might look at this plot and not notice that I have made the y-axis slightly longer than the normal y - x ratio of a bar plot (or any plot which is wider than taller). This was an intentional decision and was not one meant to mislead the viewer nor exaggerate a claim. Personally, after putting a lot of thought into the height of the bars, I concluded that augmenting the length of y-axis really would help get across the current message more clearly. The plot above shows average percentages of a whole (GNI). In this case, the whole is quite massive - it's an entire regions gross national income. If one takes the time to consider expenditure of GNI, the difference between spending 4% and 5% of an entire regions gross national income on education is really a large and very meaningful difference (especially if you were to ask any principal or teacher). Being able to slightly emphasize how large of a difference even a one percent makes in this case allows that difference to feel more real to the viewer. It also helps the viewer more easily compare between regions and within regions across years. All together, I believe it was an effective design choice.
+
+
+
+
+# Female secondary enrollment higher than male secondary enrollment in most areas of South Asia
+
+```{r, echo=F, cache=T}
+
+# nice table for stats:
+region.table <- with(region.long, tapply(ed.expend,
+                                         INDEX = list(region, year), 
+                                         FUN = mean, na.rm = TRUE))
+
+
+
+
+# female school enrollment:
+
+#fem.pre.data
+
+fem.pre.data <- fem.pre.data %>%
+        mutate(region = NA) 
+
+# subset out columns and rows not needed
+fem.pre.countries <- fem.pre.data[1:264, c(3, 5:ncol(fem.pre.data)-2, 
+                                               ncol(fem.pre.data))]
+
+fem.pre.countries <- fem.pre.countries[, c(1, 3:ncol(fem.pre.countries))]
+
+
+# apply the custom function to assign regions
+fem.pre.countries$region <- sapply(
+        fem.pre.countries$Country.Name, fem.pre.countries$region, 
+        FUN = get.regions
+)
+
+# convert region to factor for grouping and aggregation
+fem.pre.countries$region <- as.factor(fem.pre.countries$region)
+
+
+## take the wide data frame and make it long for visualization:
+
+# gather on year columns
+fem.region.long <- fem.pre.countries  %>% 
+        gather(year, enrollment, `1980`:`2016`) 
+
+# aggregate 
+fem.pre.summary <- aggregate(enrollment ~ year + region, 
+                            FUN=mean, fem.region.long)
+
+
+##>> filter data set
+fem.pre.summary<- fem.pre.summary %>%
+                        filter(year == 2015) %>%
+                        select(-one_of("year")) %>%
+                        mutate(ed.level = "Pre-Primary")
+
+fem.pre.summary$ed.level <- as.factor(fem.pre.summary$ed.level)
+
+
+# fem.primary.data
+
+fem.primary.data <- fem.primary.data %>%
+        mutate(region = NA) 
+
+# subset out columns and rows not needed
+fem.primary.countries <- fem.primary.data[1:264, c(3, 5:ncol(fem.primary.data)-2, 
+                                           ncol(fem.primary.data))]
+
+fem.primary.countries <- fem.primary.countries[, c(1, 3:ncol(fem.primary.countries))]
+
+
+# apply the custom function to assign regions
+fem.primary.countries$region <- sapply(
+        fem.primary.countries$Country.Name, fem.primary.countries$region, 
+        FUN = get.regions
+)
+
+# convert region to factor for grouping and aggregation
+fem.primary.countries$region <- as.factor(fem.primary.countries$region)
+
+
+## take the wide data frame and make it long for visualization:
+
+# gather on year columns
+fem.primary.long <- fem.primary.countries  %>% 
+        gather(year, enrollment, `1980`:`2016`) 
+
+# aggregate 
+fem.primary.summary <- aggregate(enrollment ~ year + region, 
+                             FUN=mean, fem.primary.long)
+
+
+##>> filter data set
+fem.primary.summary<- fem.primary.summary %>%
+        filter(year == 2015) %>%
+        select(-one_of("year")) %>%
+        mutate(ed.level = "Primary")
+
+fem.primary.summary$ed.level <- as.factor(fem.primary.summary$ed.level)
+
+
+# fem.secondary.data
+
+fem.secondary.data <- fem.secondary.data %>%
+        mutate(region = NA) 
+
+# subset out columns and rows not needed
+fem.secondary.countries <- fem.secondary.data[1:264, c(3, 5:ncol(fem.secondary.data)-2, 
+                                                   ncol(fem.secondary.data))]
+
+fem.secondary.countries <- fem.secondary.countries[, c(1, 3:ncol(fem.secondary.countries))]
+
+
+# apply the custom function to assign regions
+fem.secondary.countries$region <- sapply(
+        fem.secondary.countries$Country.Name, fem.secondary.countries$region, 
+        FUN = get.regions
+)
+
+# convert region to factor for grouping and aggregation
+fem.secondary.countries$region <- as.factor(fem.secondary.countries$region)
+
+
+## take the wide data frame and make it long for visualization:
+
+# gather on year columns
+fem.secondary.long <- fem.secondary.countries  %>% 
+        gather(year, enrollment, `1980`:`2016`) 
+
+# aggregate 
+fem.secondary.summary <- aggregate(enrollment ~ year + region, 
+                                 FUN=mean, fem.secondary.long)
+
+
+##>> filter data set
+fem.secondary.summary <- fem.secondary.summary %>%
+        filter(year == 2015) %>%
+        select(-one_of("year")) %>%
+        mutate(ed.level = "Secondary")
+
+fem.secondary.summary$ed.level <- as.factor(fem.secondary.summary$ed.level)
+
+
+# fem.tertiary.data
+
+fem.tertiary.data <- fem.tertiary.data %>%
+        mutate(region = NA) 
+
+# subset out columns and rows not needed
+fem.tertiary.countries <- fem.tertiary.data[1:264, c(3, 5:ncol(fem.tertiary.data)-2, 
+                                                       ncol(fem.tertiary.data))]
+
+fem.tertiary.countries <- fem.tertiary.countries[, c(1, 3:ncol(fem.tertiary.countries))]
+
+
+# apply the custom function to assign regions
+fem.tertiary.countries$region <- sapply(
+        fem.tertiary.countries$Country.Name, fem.tertiary.countries$region, 
+        FUN = get.regions
+)
+
+# convert region to factor for grouping and aggregation
+fem.tertiary.countries$region <- as.factor(fem.tertiary.countries$region)
+
+
+## take the wide data frame and make it long for visualization:
+
+# gather on year columns
+fem.tertiary.long <- fem.tertiary.countries  %>% 
+        gather(year, enrollment, `1980`:`2016`) 
+
+# aggregate 
+fem.tertiary.summary <- aggregate(enrollment ~ year + region, 
+                                   FUN=mean, fem.tertiary.long)
+
+
+##>> filter data set
+fem.tertiary.summary  <- fem.tertiary.summary  %>%
+        filter(year == 2015) %>%
+        select(-one_of("year")) %>%
+        mutate(ed.level = "Tertiary")
+
+
+fem.tertiary.summary$ed.level <- as.factor(fem.tertiary.summary$ed.level)
+
+
+
+# bind 4 data sets by rows into one master set:
+all.fem.education <- rbind(fem.pre.summary,fem.primary.summary,
+                           fem.secondary.summary,fem.tertiary.summary)
+
+
+
+
+## Circular bar plot of female education:
+
+# Set a number of 'empty bar' to add at the end of each group
+empty_bar=3
+to_add = data.frame( matrix(NA, empty_bar*nlevels(all.fem.education$ed.level), ncol(all.fem.education)) )
+colnames(to_add) = colnames(all.fem.education)
+to_add$ed.level=rep(levels(all.fem.education$ed.level), each=empty_bar)
+data=rbind(all.fem.education, to_add)
+data=data %>% arrange(ed.level, enrollment)
+data$id=seq(1, nrow(data))
+
+
+# Get the name and the y position of each label
+label_data=data
+number_of_bar=nrow(label_data)
+angle= 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust<-ifelse( angle < -90, 1, 0)
+label_data$angle<-ifelse(angle < -90, angle+180, angle)
+
+# prepare a data frame for base lines
+base_data=data %>% 
+        group_by(ed.level) %>% 
+        summarize(start=min(id), end=max(id) - empty_bar) %>% 
+        rowwise() %>% 
+        mutate(title=mean(c(start, end)))
+
+# prepare a data frame for grid (scales)
+grid_data = base_data
+grid_data$end = grid_data$end[ c( nrow(grid_data), 1:nrow(grid_data)-1)] + 1
+grid_data$start = grid_data$start - 1
+grid_data=grid_data[-1,]
+
+```
+
+```{r, echo=F, cache=T}
+# compare female to male tertiary education in north america and europe
+
+
+southAsia.fem <- fem.secondary.long %>%
+                        filter(year == 2015 & region == "South Asia") %>%
+                        mutate(gender = "Female")
+
+#fem.secondary.long %>%
+#        filter(year == 2005 & region == "South Asia")
+
+
+
+
+# male.secondary.data
+
+
+male.secondary.data <- male.secondary.data %>%
+        mutate(region = NA) 
+
+# subset out columns and rows not needed
+male.secondary.countries <- male.secondary.data[1:264, c(3, 5:ncol(male.secondary.data)-2, 
+                                                     ncol(male.secondary.data))]
+
+male.secondary.countries <- male.secondary.countries[, c(1, 3:ncol(male.secondary.countries))]
+
+
+# apply the custom function to assign regions
+male.secondary.countries$region <- sapply(
+        male.secondary.countries$Country.Name, male.secondary.countries$region, 
+        FUN = get.regions
+)
+
+# convert region to factor for grouping and aggregation
+male.secondary.countries$region <- as.factor(male.secondary.countries$region)
+
+
+## take the wide data frame and make it long for visualization:
+
+# gather on year columns
+male.secondary.long <- male.secondary.countries  %>% 
+        gather(year, enrollment, `1980`:`2016`) 
+
+
+# filter 
+southAsia.male <- male.secondary.long %>%
+                      filter(year == 2015 & region == "South Asia") %>%
+                      mutate(gender = "Male")
+
+
+# rbind into super set
+all.sAsia.secondary <- rbind(southAsia.fem, southAsia.male) %>%
+        filter(Country.Name != "Maldives" & Country.Name != "Sri Lanka" )
+```
+```{r, echo=F, cache = T, fig.width=12, fig.height=7}
+# plot
+ggplot(all.sAsia.secondary, aes(y = enrollment, 
+              x = Country.Name, fill = gender)) +
+        geom_bar(colour="darkgrey", stat = "identity", position = "dodge") +
+        geom_text(
+                aes(label = sprintf("%.1f", enrollment), y = enrollment, group = gender),
+                size = 3, position = position_dodge(width=0.9), vjust=-0.40
+        ) +
+        labs( 
+                fill = 'gender\n',
+                x = "",
+                y = "total enrollment (% gross)\n", 
+                title = "Male and female secondary education enrollment: \nSouth Asia, 2015\n\n"
+        ) +
+        theme_tufte() + 
+        theme( 
+                text = element_text(size=12,  family="Calibri (Body)"),
+                plot.title = element_text(hjust = 0)
+        ) +
+        scale_fill_few()
+
+```
+
+This plot follows much of the same design decisions I used above with one key difference. The visual weight of the features of this plot is slightly different than the one above. I didn't adjust the vertical height of this plot but instead kept the width more predominant, again, to better show the message I wanted the reader to see. I chose South Asia because it had the largest improvement in mean educational expenditure in the first visualization. Here, we are looking at education enrollment in different countries of South Asia in 2015. The important part, though, is to understand how education enrollment is different between genders in these countries. Because the genders are grouped side-by-side, the width of each bar makes the separation more obvious and important to the viewer. The colours and white space are again based off the recommendations of Tufte and Few. Hue works particularly well here for associating the quantitative values (total enrollment) with the categorical values (gender).  
+  
+It should be noted that here, raw percentages are being visualized rather than means (as in the first plot). Here we can see that in most regions of South Asia, more females were enrolled in secondary school than males in 2015. The country with the largest difference between male and female enrollment (in favor of females) is Bangladesh while secondary enrollment in Indian is roughly even between genders. Interestingly, in Pakistan and especially Afghanistan, males are much more likely to have enrolled in secondary schools than females in 2015.   
+
+
+# Global number of deaths by natural disaster falling, extreme temperature deaths more common
+```{r, echo = F, cache = T}
+### natural disaster
+
+#disaster.damage.data
+
+
+
+# add na col to be filled
+disaster.deaths.data <- disaster.deaths.data %>%
+                        mutate(decade = NA)
+
+
+# function to return decases based off of years:
+
+get.decades <- function(year.column, new.column) {
+        
+        dec.1950 <- seq(1950,1959)
+        dec.1960 <- seq(1960,1969)
+        dec.1970 <- seq(1970,1979)
+        dec.1980 <- seq(1980,1989)
+        dec.1990 <- seq(1990,1999)
+        dec.2000<- seq(2000,2009)
+        dec.2010 <- seq(2010, 2018)
+        
+        if (is.element(year.column, dec.1950)) {
+                new.column = "1950's"
+        } else if (is.element(year.column, dec.1960)) {
+                new.column = "1960's"
+        } else if (is.element(year.column, dec.1970)) {
+                new.column = "1970's"
+        } else if (is.element(year.column, dec.1980)) {
+                new.column  = "1980's"
+        } else if (is.element(year.column, dec.1990)) {
+                new.column  = "1990's"
+        } else if (is.element(year.column, dec.2000)) {
+                new.column  = "2000's"
+        } else if (is.element(year.column, dec.2010)) {
+                new.column  = "2010's"
+        } else {
+                new.column  = "1900's"
+        }
+        
+        return (new.column)
+        
+}
+
+# apply decades function
+disaster.deaths.data$decade <- sapply(
+                                        disaster.deaths.data$Year, disaster.deaths.data$decade, 
+                                        FUN = get.decades
+)
+
+# put deaths in millions
+disaster.deaths.data$Total.deaths <- disaster.deaths.data$Total.deaths /1000000
+```
+```{r, echo=F, cache = T, fig.width=12, fig.height=7}
+# filter and plot:
+disaster.deaths.data %>%
+        filter( decade != "1900's" & 
+                !is.element(Entity, c("All natural disasters", "Mass movement (dry)", "Volcanic activity", "Wildfire", "Landslide"))) %>%
+        ggplot(., aes(x = decade, y = Total.deaths, fill = Entity)) + 
+                geom_bar(stat = "identity") +
+        labs( 
+                fill = 'event\n',
+                x = "",
+                y = "total number of deaths (in millions)\n", 
+                title = "Total number of global deaths from natural disaster, by decades \n"
+        ) +
+       # scale_y_discrete(limits = c(0, 500, 1000, 1500, 2000), labels=c("0.5","1","1.5","2")) +
+        theme_tufte() + 
+        theme( 
+                text = element_text(size=12,  family="Calibri (Body)"),
+                plot.title = element_text(hjust = 0)
+        ) +
+        scale_fill_few()
+```
+  
+This stacked bar chart is a classic example of a way to visualize parts of a whole. It is important to know that this plot does not display an exhaustive list of natural disasters measured. A few underrepresented disaster types where stripped from the visualization to make the categories easier to see and map to their associated hues. The maximum number of unique values of a categorical variable which should be represented by hue (eight) felt cluttered when applied to this plot. Because of this, I chose to visualize six of the categories. All the most notable disaster types (in terms of their presence in the data set) were retained. To briefly touch on the hue choice, I did again go with the direct recommendations from Steven Few for bars (or any large graphical object) by making the colours more washed-out. However, some of the categories are represented visually with quite small areas in the plot (slivers on the bars). One might argue that in these cases, we ought to make the ink more vibrant to really capture those small, but perhaps important, category values. I tried that approach and it did not look as clean and ended up making the smaller category values more ambiguous. This, I found, was because the choice to have many vibrant colours so close together in a relatively small area made the categories compete for your visual attention (they seemed harder to recognize). Here, I believe Few's guidelines still apply perfectly well and the vibrancy of the ink is just right. Also, as the visual weight of each bar is even more pronounced in this plot compared to the previous bar plots, outlining the bars did not add any visual aid so I chose to omit that ink. Furthermore, because this type of plot is more about making relative comparisons between stacked categories, I did not choose to include any actual values as I did in the previous examples. Briefly, I considered adding overall occurrence counts (in millions) but I do not think it is necessary nor interesting here. Sticking to my running theme of clean, classic, and print-friendly, this plot achieves those goals.  
+
+Looking at the plot, an overall trend from the 1950's to the 2010's can easily be seen; the number of deaths due to natural disaster across the world shows a downward trend decade-over-decade, with a spike in the 2000's. This spike is likely accounted for greatly by the 2004 Indian Ocean earthquake in Indonesia which killed almost 300,000 people. This explanation is supported by the size of the earthquake category for that decade in the plot. Comparing between decades in terms of deaths by each type of disaster, there is a clear shift in the types of disasters which are were more devastating many decades ago versus the those which were devastating more recently.  In the past it seems that floods, draughts, and earthquakes accounted for most deaths. More recently, earthquakes have remained a common factor in natural disaster deaths, but it appears extreme temperature and extreme weather has accounted for many more deaths than in the past. This observation is likely connected to the changing temperature of the Earth over time.  
+
+
+# Cost of natural disasters increasing with devastating potentials
+```{r, echo=F, cache = T, fig.width=12, fig.height=6}
+# re-read overwritten data:
+disaster.deaths.data <- read.csv(paste(disaster.path, paste0(disaster.sets[3], ".csv"), sep = "/"), 
+                                 header = TRUE)
+
+disaster.damage.data %>%
+        filter(Entity == "All natural disasters" & Year >= 1940) %>%
+        ggplot(., aes(x=Year, y=Total.economic.damage)) + 
+                geom_line(size= 1, colour = "dodgerblue")+
+                geom_point(size = 2, colour = "dodgerblue4" ) +
+                labs(
+                      title="Total global cost of resulting damages from natural disasters (in billions):",
+                      subtitle = "1940 - 2017\n",
+                      y="",
+                      x = ""
+                    ) +  # title and caption
+        annotate("text", x = 2011, y = 380000000000, label = "$364 Billion") +
+        annotate("text", x = 2005, y = 226000000000, label = "$214 Billion") +
+        annotate("text", x = 1995, y = 167000000000, label = "$155 Billion") +
+        annotate("text", x = 1980, y = 45000000000, label = "$32 Billion") +
+        scale_x_continuous(breaks = c(seq(1940,2017, by = 5))) +
+        scale_y_continuous(
+                            breaks = c(0, 50000000000, 100000000000, 150000000000, 
+                                      200000000000, 250000000000, 300000000000, 350000000000 ),
+                            labels = c("$0 ", "$50 B ", "$100 B ", "$150 B ", "$200 B ",
+                                            "$250 B ", "$300 B ", "$350 B ")
+                          ) +
+        theme_hc()  + 
+        theme( 
+                text = element_text(size=11,  family="Calibri (Body)"),
+                plot.title = element_text(hjust = 0),
+                axis.text.x = element_text(angle = 70, hjust = 1)
+             )
+```
+  
+  
+My goal for this visualization was to push everything to the background to make the trend line pop off the page. Everything outside and around the graphical object is quite uniform and washed-out. The background and axes blend together naturally and are just different enough to be seen as unique elements of the plot. The idea of pushing the less valuable information to the background and emphasizing the data is a clear message both Tufte and Few emphasized. I believe this plot fits this idea just right; any less ink and important information would be lost; any more ink would introduce unnecessary information. The vertical grid lines are all that is necessary to organize the information clearly to the reader. Another I made was to make the data points darker than the lines connecting each point. This, I believe, makes seeing the actual values and comparing between years much easier. My favorite decision made when designing this plot was to restrict the y-axis down to allow the highest grid line to pass below the maximal value on the trend line. This gives the plot an "off-the-charts" quality to it when combined with the floating value above it that I really enjoy. It sends a strong message because of this decision: 364 billion feels like a lot more when visualized in this way. This is a good thing and not deceptive because that value is a real stand out in the data set.  
+
+The obvious message this plot portrays is that global costs resulting from natural disasters is increasing over time but that this increase is inconsistent (spikey). This makes sense due to the natural and severity of natural disasters, where they strike and what infrastructure and live they demolish. Personally, I think the more interesting story is the shear potential for devastation these disasters may carry. That is the story I really wanted to tell. Showing others the potential impact of disasters, rather than that they are simply increasing over time, might act as a better call-to-arms towards the exploration of better climate research and disaster control procedures. At the very least it brings to life an important message.
+  
+  
+# World child malnutrition rates decreasing, most rapidly in South Asia and Africa
+```{r, echo = F, cache=T}
+### birth, fertility and growth
+
+### stunting.data
+
+# create empty region column
+#stunting.data <- stunting.data %>%
+#        mutate(region = NA) 
+
+
+# subset out columns and rows not needed
+stunting.countries <- stunting.data[1:264, c(3, 5:ncol(stunting.data)-1)]
+
+# subet further
+stunting.countries  <- stunting.countries [, c(1, 3:ncol(stunting.countries))]
+
+# apply the custom function to assign regions
+#stunting.countries $region <- sapply(
+#        stunting.countries $Country.Name, stunting.countries$region, 
+#        FUN = get.regions
+#)
+
+# convert region to factor for grouping and aggregation
+#stunting.countries$region <- as.factor(stunting.countries$region)
+
+# convert region to factor for grouping and aggregation
+#stunting.countries$region <- as.factor(stunting.countries$region)
+
+
+## take the wide data frame and make it long for visualization:
+
+# gather on year columns
+stunting.long <- stunting.countries  %>% 
+        gather(year, stunting, `1980`:`2016`) 
+
+# aggregate 
+stunting.summary <- aggregate(stunting ~ year + Country.Name, 
+                            FUN=mean, na.rm = TRUE, stunting.long)
+
+# fiter for intervals required
+world <- c('North America', 'Sub-Saharan Africa', 'South Asia', 'East Asia & Pacific', 
+  'Europe & Central Asia','Middle East & North Africa', 'Latin America & Caribbean')
+
+stunting.summary <- stunting.long %>%
+        filter(   ( Country.Name %in% world)
+                  & ( year %in% c('2000', '2005', '2010', '2015' ))
+)
+
+
+# manually fill missing data from worldbank.org reference
+# eu
+stunting.summary[2,3] <- 6.6
+stunting.summary[9,3] <- 5.2
+stunting.summary[16,3] <- 4.4
+stunting.summary[23,3] <- 3.7
+# na
+stunting.summary[5,3] <- 0.7
+stunting.summary[12,3] <- 0.6
+stunting.summary[19,3] <- 0.6
+stunting.summary[26,3] <- 0.5
+
+
+# below 2 functions taken from https://github.com/jkeirstead/r-slopegraph
+
+tufte_sort <- function(df, x="year", y="value", group="group", method="tufte", min.space=0.05) {
+        ## First rename the columns for consistency
+        ids <- match(c(x, y, group), names(df))
+        df <- df[,ids]
+        names(df) <- c("x", "y", "group")
+        
+        ## Expand grid to ensure every combination has a defined value
+        tmp <- expand.grid(x=unique(df$x), group=unique(df$group))
+        tmp <- merge(df, tmp, all.y=TRUE)
+        df <- mutate(tmp, y=ifelse(is.na(y), 0, y))
+        
+        ## Cast into a matrix shape and arrange by first column
+        require(reshape2)
+        tmp <- dcast(df, group ~ x, value.var="y")
+        ord <- order(tmp[,2])
+        tmp <- tmp[ord,]
+        
+        min.space <- min.space*diff(range(tmp[,-1]))
+        yshift <- numeric(nrow(tmp))
+        ## Start at "bottom" row
+        ## Repeat for rest of the rows until you hit the top
+        for (i in 2:nrow(tmp)) {
+                ## Shift subsequent row up by equal space so gap between
+                ## two entries is >= minimum
+                mat <- as.matrix(tmp[(i-1):i, -1])
+                d.min <- min(diff(mat))
+                yshift[i] <- ifelse(d.min < min.space, min.space - d.min, 0)
+        }
+        
+        
+        tmp <- cbind(tmp, yshift=cumsum(yshift))
+        
+        scale <- 1
+        tmp <- melt(tmp, id=c("group", "yshift"), variable.name="x", value.name="y")
+        ## Store these gaps in a separate variable so that they can be scaled ypos = a*yshift + y
+        
+        tmp <- transform(tmp, ypos=y + scale*yshift)
+        return(tmp)
+        
+}
+
+# to make the plot look nice:
+fixed.names <- c("South Asia ", "Sub-Saharan \nAfrica ", "East Asia & \nPacific ", "Middle East & \nNorth Africa ", 
+                 "Latin America & \nCaribbean ", "Europe & \nCentral Asia ", "North America ")
+# put fixed.names into labels = in below function:
+plot_slopegraph <- function(df) {
+        ylabs <- subset(df, x==head(x,1))$group
+        yvals <- subset(df, x==head(x,1))$ypos
+        fontSize <- 3
+        gg <- ggplot(df,aes(x=x,y=ypos)) +
+                geom_line(aes(group=group),colour="grey80") +
+                geom_point(colour="white",size=20) +
+                geom_text(aes(label=y), size=fontSize, family = "Calibri (Body)", fontface = "bold") +
+                scale_y_continuous(name="", breaks=yvals, labels=rev(fixed.names)) 
+        return(gg)
+}
+
+# call function on summary df
+stunting.df <- tufte_sort(stunting.summary, 
+                 x="year", 
+                 y="stunting", 
+                 group="Country.Name", 
+                 method="tufte", 
+                 min.space=0.05)
+# transform years to factor and values rounded
+stunting.df <- transform(stunting.df, 
+                x=factor(x, levels=c(2000,2005,2010,2015), 
+                         labels=c("2000","2005","2010", "2015")), 
+                y=round(y, 1))
+
+
+
+```
+```{r, echo = F, cache=T, fig.height=9, fig.width=7}
+# plot the slope graph:
+plot_slopegraph(stunting.df) + 
+        labs(title="World stunting rates (2000 - 2015)",
+             subtitle = "Number of children under 5 that are stunted (millions)\n") +
+        theme(axis.title=element_blank(),
+              axis.ticks = element_blank(),
+              plot.title = element_text(hjust=0.5, family = "Calibri (Body)",
+                                        face="bold"),
+              plot.subtitle = element_text(hjust=0.5, family = "Calibri (Body)",
+                                           face="bold"),
+              axis.text = element_text(size = 10, face="bold", family = "Calibri (Body)"),
+              panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+              panel.background = element_blank(), axis.line = element_line(colour = "black"),
+              axis.line.x = element_line(color="black", size = 0.6),
+              axis.line.y = element_line(color="black", size = 0.6)) 
+```
+  
+  
+This is probably one of the most unique charts within this project. This is a slope chart inspired by Tufte. The idea behind this chart is to show the increase or decrease in values over time across levels of some category as a slope in the chart. This type of chart is effective with only a few time values and not too many categorical levels. Personally, I find it refreshing to look at visualizations which are a bit different in how they are designed, but particularly effective at their job. The slope chart is just that; both particular and effective. I would argue that this type of plot is actually one of the most effective and intuitive charts available when it comes to visualizing short relationships over time. This is because the viewer has quick access to the access l numbers as if she or he were reading a table, but these numbers are also positions in 2-D space and connected visually with breaking segments. By incorporating these features, the slope chart brings together some of the greatest strengths and utilities of both a table and a chart. The viewer doesn't only see the numbers, they see how the numbers relate to each other within and between groups. One can choose to compare the numbers, the segments between adjacent numbers, or the entire slopes themselves.  Additionally, the use of whitespace in this chart is very important. Larger and smaller amounts of vertical whitespace serve the purpose of making the difference between category levels very clear. The whitespace tells the viewer whether or not the regions are close together (similar) or far apart (different). One weakness unique to this type of plot is that it is ordered by the first value and the slopes cannot overlap. Thus, ideally, this plot is designed with data which only ever decays overtime at a consistent rate in mind (such as survival rates). This data set matched the slope charts purpose but not completely.  
+
+Actual stunting rates are considered a consequence of malnutrition during early growth periods. Looking at the slop plot, South Asia has both the highest rates of stunting across each year (2000, 2005, 2010, 2015) and the greatest decrease in stunting rates from 2000 to 2015. This can be seen from its position on the plot (highest on y-axis) and the steepness of its slope relative to other regions. Sub-Saharan Africa falls just below South Asia with the second highest rates of stunting followed by a large gap on the plot. As previously mentioned, this whitespace is important and gives the reader a valuable source of information. Not only can the difference between these two regions and the rest of world in terms of stunting rates be fully appreciated, whether that difference (gap) is closing or increasing over time can also be seen. Although South Asia and Sub-Saharan Africa have made great progress over the years, so have regions like East Asia and the Middle East. Overall, the gap between the regions with the highest stunting rates and the rest of the world is closing at a slow and steady rate as progress is being made globally. 
+    
+
+
+
+
+# Latin and Caribbean unemployment rates pulled down by few very impoverished countries
+```{r, echo = F, cache=T}
+### employment
+
+#participation.ratio.data
+
+
+
+#unemploy.rates.data
+# use the diverging lollipop
+
+
+latin.unemploy <- unemploy.rates.data %>%
+                        gather(year, unemploy.rates, `2000`:`2017`) %>%
+                        filter(Country.Name %in% latinAm.caribbean,
+                               year == '2015') %>%
+                        select(Country.Name, unemploy.rates) %>%
+                        drop_na()
+               
+
+
+# normalizaed unemplyment rates
+latin.unemploy$unemploy.rates <- round((latin.unemploy$unemploy.rates - 
+                                                mean(latin.unemploy$unemploy.rates))/sd(latin.unemploy$unemploy.rates), 2)
+# make new col and arrage
+latin.unemploy <- latin.unemploy %>%
+                        mutate(relative = ifelse(unemploy.rates < 0, "below", "above")) %>%
+                        arrange(unemploy.rates)
+       
+# factorize 
+latin.unemploy$Country.Name <- factor(latin.unemploy$Country.Name, levels = latin.unemploy$Country.Name)
+        
+```
+```{r, r, echo=F, cache = T, fig.width=8, fig.height=10}
+
+ggplot(latin.unemploy, aes(x = Country.Name, y = unemploy.rates, label = unemploy.rates)) + 
+        geom_hline(yintercept = 0, color = "darkgrey", size=.2) +
+        geom_point(stat='identity', aes(color = relative), size=7.5)  +
+        geom_segment(aes(y = 0, 
+                         x = Country.Name, 
+                         yend = unemploy.rates*.95, 
+                         xend = Country.Name,
+                         color = relative)) +
+        geom_text(color = "black", size = 2.5) +
+        labs(title="Relative unemployment rates",
+             subtitle = "Latin America and the Caribbean\n",
+             y ="Normalized unemployment rates\n(% of total labour force)",
+             x = "") + 
+        ylim(-3.5, 3.5) +
+        scale_color_few() +
+        theme_hc() +
+        theme(  legend.position="none",
+                text = element_text(size=11,  family="Calibri (Body)")
+        ) +
+        coord_flip()
+```
+  
+This visualization shows a deviation relationship from a fixed reference point which I have chosen to be the average unemployment rate of Latin America and the Caribbean. These data have been normalized via a Z-score transformation, a distribution with a mean of zero where values are expressed in terms of standard deviations from the mean. Some people may call this standardization but, in actuality, the term 'normalization' has many meanings, including standardization. Countries with unemployment rates above average are indicated as red, while countries with unemployment rates below average are indicated as green. I chose red for above average and green for below average because red often indicated bad or worse while green indicated good or better. Since having an above average unemployment rate is negative for a country, these countries are denoted as red (and vice-versa). Again, the non-data ink is pushed to the background to allow the data to pop. I chose to only include the y-axis grid lines to help organize the plot in order to better pair each country to their normalized value. The x-axis grid lines are not needed for a few reasons, the main one being that I annotated the value of each country within its point on the plot. This plot is particularly effective at showing divergence not only because of the fixed reference point, but also because of the branches from that reference point. The length of each line clearly gives the viewer an indication of how much a country differs, either above or below, the average unemployment rate.  
+
+This visualization shows that there are more countries in Latin America and the Caribbean below the average unemployment rate than above it. This is because there are a few countries which have unemployment rates much higher than average, inflating the mean unemployment rate. St. Vincent is more than two standard deviations above the average unemployment rate while St. Lucia is almost three and a half standard deviations above. On the other hand, Peru, Guatemala, and Cuba are all one or more standard deviations below the average unemployment rate. 
+
+  
+  
+
+# Global CO2 emissions rising rapidly, largely accounted for by upper-middle income countries
+```{r, echo = F, cache=T}
+### environmental sustainability and pollution
+
+## income groups:
+# "low.income"
+# "uprMid.income"
+# "high.income"
+# "lowMid.income" 
+
+
+### View(co2.emiss.data)
+# take data from 1995 to 2014
+
+co2.emiss.data2 <- co2.emiss.data %>%
+        gather(year, co2.emiss, `1960`:`2014`) %>%
+        select(Country.Name, year, co2.emiss)
+
+get.income <- function (first.col, second.col) {
+        
+        if (is.element(first.col, low.income)) {
+                second.col = "Low Income"
+        } else if (is.element(first.col, uprMid.income)) {
+                second.col = "Upper-Middle Income" 
+        } else if (is.element(first.col, high.income)) {
+                second.col = "High Income" 
+        } else if (is.element(first.col, lowMid.income)) {
+                second.col = "Low-Middle Income" 
+        } else {
+                second.col = NA
+        }
+        return (second.col)
+}
+# firx encoding
+co2.emiss.data2$Country.Name <- sub("â???T", "'", co2.emiss.data2$Country.Name)
+
+# apply the custom function to assign regions
+co2.emiss.data2$Income <- sapply(
+        co2.emiss.data2$Country.Name, co2.emiss.data2$Income, 
+        FUN = get.income
+)
+
+# convert region to factor for grouping and aggregation
+co2.emiss.data2$Income <- factor(co2.emiss.data2$Income, levels = c("Low Income", "Low-Middle Income", 
+                                                                        "Upper-Middle Income", "High Income"),
+                                                             labels = c("Low Income", "Low-Middle Income", 
+                                                                        "Upper-Middle Income", "High Income")
+                                    )
+
+co2.emiss.data2 <- co2.emiss.data2 %>%
+        group_by(year, Income) %>%
+        summarize(mean.co2.emiss = mean(co2.emiss, na.rm = T)) %>%
+        select(Income, mean.co2.emiss, year) %>%
+                drop_na()
+        
+
+# co2.emiss.data2 =co2.emiss.data2[order(co2.emiss.data2$Income, decreasing=T) , ]
+
+
+year.fixed<- (rep(1960:2014, each = 4))
+co2.emiss.data2$year <- year.fixed
+co2.emiss.data2 <- as.data.frame(co2.emiss.data2)
+```
+```{r, echo=F, cache = T, fig.width=12, fig.height=5}
+options(scipen = 9999)
+library(scales)
+ggplot(co2.emiss.data2, aes(x=year, y= mean.co2.emiss, fill=Income)) +
+        geom_area(colour="grey50", size=.1, alpha=.6) +
+        scale_fill_brewer(type = "seq", palette = "Set2", direction = -1) +
+        scale_x_continuous(limits= c(1960, 2014), breaks = c(seq(1960, 2014, by = 5), 2014)) +
+        scale_y_continuous(limits= c(0, 600000), breaks = seq(0, 600000, by = 100000)) +
+        labs( title = "Global CO2 emission by income category",
+              subtitle = "1960 - 2014\n",
+              x = "\nYear", 
+              y = "CO2 emissions (metric tons per capita)\n") +
+        theme_hc() +
+        theme( text = element_text(size=11,  family="Calibri (Body)"))
+```
+  
+This visualization shows the change over time of CO2 emissions globally, grouped by countries which call into different income categories: low income, low-middle income, upper-middle income, and high-income. The filled-area chart is a standard but effective visualization for showing this type of relationship. I chose to make the colours slightly transparent so that the viewer could see the vertical grid lines through each area. This visualization makes it easy to see that global CO2 emissions have rose greatly between 1960 and 2014 and that this rise has been most dramatic in upper-middle income countries. As expected, low income countries barely produce CO2 emissions because they are not developed enough industrially to produce gas emissions at a large scale. High income countries seem to be emitting CO2 at a consistent rate over the years. Perhaps this has something to do with population sizes.
+  
+
+# Resource depletion greatest in lower income countries, especially African nations
+```{r, echo = F, cache=T}
+#resource.depletion.data
+#renewable.consume.data
+
+resource.depletion.data$Country.Name <- sub("â???T", "'", resource.depletion.data$Country.Name)
+#renewable.consume.data$Country.Name <- sub("â???T", "'", renewable.consume.data$Country.Name)
+
+resource.depletion.data<- resource.depletion.data%>%
+                                select(Country.Name, `2016`)
+
+
+# apply the custom function to assign regions
+resource.depletion.data$Income <- sapply(
+        resource.depletion.data$Country.Name, resource.depletion.data$Income, 
+        FUN = get.income
+)
+
+# ass regions
+resource.depletion.data$region <- sapply(
+        resource.depletion.data$Country.Name, resource.depletion.data$region, 
+        FUN = get.regions
+)
+
+resource.depletion.data <- resource.depletion.data[1:217, ]
+
+resource.depletion.data <- resource.depletion.data  %>% drop_na()
+```
+```{r, echo=F, cache = T, fig.width=12, fig.height=8}
+library(ggridges)
+# plot the ridgeplot to compare distributions
+p1 <- ggplot(resource.depletion.data, aes(x = `2016`, y = Income, fill = Income)) +
+        geom_density_ridges() +
+        labs(title="Global natural resource depletion", 
+             subtitle=" 1. by income category and 2. by region\n",
+             x = "",
+             y = "") +
+        theme_hc() +
+        theme(plot.title = element_text(size=14,  family = "Calibri (Body)"),
+              plot.subtitle = element_text(size=10,  family = "Calibri (Body)"),
+              plot.caption = element_text(size=8,  family = "Calibri (Body)"),
+              axis.text.x = element_blank(),
+              axis.ticks.x = element_blank(),
+              axis.text.y = element_text(size=10,  family = "Calibri (Body)"),
+              axis.title = element_text(size=11,  family = "Calibri (Body)"),
+              legend.position = "none") +
+        scale_x_continuous(breaks = seq(0, 35, by = 5)) +
+        scale_fill_few()
+
+p2 <- resource.depletion.data %>%
+        filter(region != "North America") %>%
+        ggplot(aes(x = `2016`, y = region, fill = region)) +
+                geom_density_ridges() +
+                labs(
+                     caption="GNI: Gross National Income",
+                     x = "\nResource depletion (% of GNI)\n",
+                     y = "")  +
+                theme_hc() +
+                theme(plot.title = element_blank(),
+                      plot.subtitle = element_text(size=10,  family = "Calibri (Body)"),
+                      axis.text.x = element_text(size=10,  family = "Calibri (Body)"),
+                      axis.text.y = element_text(size=10,  family = "Calibri (Body)"),
+                      axis.title = element_text(size=11,  family = "Calibri (Body)"),
+                      legend.position = "none") +
+                scale_x_continuous(breaks = seq(0, 35, by = 5)) +
+                scale_fill_few()
+grid.arrange(p1, p2, ncol = 1)
+```
+  
+This visualization is actually two ridge plots which I combined together. This was done by stacking them on top of each other and removing x-axis label and values of the top plot and the title of the bottom plot to avoid unnecessary repetition. This also created the illusion of a single plotting window. This type of plot is useful for comparing distributions, specifically multiple density plots. The colour scheme is again based off Few's recommendations. Each distribution is outlined in black to make the overlapping areas more distinct and the disturbing clearer across the white background.  
+
+Resource depletion (as percentage of gross national income) is displayed for both world regions and income categories. Looking at the income grouping of distributions, high and upper-middle income countries have mostly low percentages of resource depletion and are positively skewed. The distributions of low and low-middle income countries contain more countries with higher rates of resource depletion. This makes sense as the two issues are closely connected, with countries with less resources or poor management of resources experiencing economic burden. Looking at the regional grouping of distributions, a similar story can be seen from a distinct perspective. Sub-Saharan Africa explains a lot about the resource depletion distribution of low income countries see in the first grouping. This region has some countries with very high depletion of resources. 
+
+
+
+# Greenhouse gas emissions at all time high, hasn't seen decrease since 2003
+```{r, echo = F, cache=T}
+# greenhouse.emiss.data
+
+
+greenhouse.emiss.data2 <- greenhouse.emiss.data %>%
+        gather(year, greenhouse.emiss, `1980`:`2014`) %>%
+        select(Country.Name, year, greenhouse.emiss)
+
+# fix encoding
+greenhouse.emiss.data2$Country.Name <- sub("â???T", "'", greenhouse.emiss.data2$Country.Name)
+
+# assign regions
+greenhouse.emiss.data2$region <- sapply(
+        greenhouse.emiss.data2$Country.Name, greenhouse.emiss.data2$region, 
+        FUN = get.regions
+)
+
+# apply the custom function to assign regions
+greenhouse.emiss.data2$Income <- sapply(
+        greenhouse.emiss.data2$Country.Name, greenhouse.emiss.data2$Income, 
+        FUN = get.income
+)
+
+greenhouse.emiss.data2 <- greenhouse.emiss.data2%>%
+        group_by(year, Income) %>%
+        summarize(mean.greenhouse.emiss = mean(greenhouse.emiss, na.rm = T)) %>%
+        drop_na()
+
+library(ggTimeSeries)
+# plot time series
+#ggplot(greenhouse.emiss.data2, aes(x=year, y = mean.greenhouse.emiss, group = Income)) + 
+#        geom_line(aes(color=Income))+
+#        geom_point(aes(color=Income))
+
+only.upper <- greenhouse.emiss.data2 %>% 
+                        filter(Income == "Upper-Middle Income")
+
+```
+```{r, echo=F, cache = T, fig.width=10, fig.height=5}
+options(scipen = 9999)
+ggplot_waterfall(
+        dtData = only.upper ,'year', 'mean.greenhouse.emiss',
+        nArrowSize = 0.2) +
+        scale_color_manual(values = c("green4", "red2"))+
+        theme_minimal() +
+        theme(plot.title = element_text(size=14,  family = "Calibri (Body)"),
+              plot.subtitle = element_text(size=10,  family = "Calibri (Body)"),
+              axis.text.x = element_text(size=10,  family = "Calibri (Body)", angle = 75, hjust = 1),
+              axis.text.y = element_text(size=10,  family = "Calibri (Body)"),
+              axis.title = element_text(size=11,  family = "Calibri (Body)"),
+              legend.position = "none") +
+        labs(title = "Global greenhouse gas emissions (upper-middle income nations)",
+             subtitle = "1980 - 2011",
+             y = "gas emissions (metric tons per capita)\n")
+
+```
+  
+This visualization is a slightly different take on a time-series. Using coloured arrows helps the viewer better appreciate the magnitude of increase or decrease in greenhouse gas emissions year-to-year. As we can visually group each individual arrow into a larger picture, this plot still captures the overall trend in greenhouse gas emissions but also makes yearly comparisons much easier. Some decisions made which make this plot easier to read are the incorporation of major and minor y-axis grid lines and vertically adjusted labels for each year on the x-axis. I choose to only plot upper-middle class countries because these countries seemed to be the largest contributors to CO2 emissions (seen in the area plot before). The overall trend shows an increase in global greenhouse gas emissions overtime. In fact, there hasn't been a year-to-year decline in greenhouse gas emissions since 2003.  Even this decrease may be an artifact resulting from the significant increase in emissions the year before (from 2001-2002). In more recent years, the largest year-to-year increases in greenhouse gas emissions have been in 2007 and 2010. 
+  
+
+# Minor and major progresses made in electricity access across sub-Saharan Africa, except Zimbabwe 
+```{r, echo = F, cache=T}
+### Access to essentials
+
+library(ggalt)
+
+#latin.unemploy <- unemploy.rates.data %>%
+africa.electricity <- essentials.data %>%
+        filter(Country.Name %in% subSaharan.africa) %>%
+        select(Country.Name, `2010`, `2015`)
+
+# to order the plot correctly
+africa.electricity$Country.Name <- factor(africa.electricity$Country.Name , 
+                                          levels=as.character(africa.electricity$Country.Name )) 
+
+# drop the outliers
+to.drop <- c("Mauritius",
+             "Seychelles",'Gabon',
+             "South Africa", "Cabo Verde")
+africa.electricity <- africa.electricity %>%
+                                filter(!is.element(Country.Name, to.drop))
+```
+```{r, echo=F, cache = T, fig.width=8, fig.height=10}
+# reorder y axis reverse x 
+ggplot(africa.electricity, aes(x=`2010`, xend=`2015`, y=reorder(Country.Name, -`2010`) , group=Country.Name )) + 
+        geom_dumbbell(color="deepskyblue", 
+                      colour_xend="deepskyblue4",
+                      size_x = 2,
+                      size_xend = 2) + 
+        scale_x_continuous() + 
+        labs(x="\n% of population", 
+             y="", 
+             title="Access to electricity in Sub-Saharan Africa", 
+             subtitle="Percent Change: 2010 vs 2015") +
+        theme_minimal() +
+        theme( text = element_text(size=11,  family="Calibri (Body)"))
+
+```
+  
+The goal of this visualization is to give the reader all the information he or she needs with only the graphical elements and no legend required. It should be intuitive what the colours and line segments mean so a legend is not required. Each point on the plot represents a year where light blue points represent 2010 and dark blue points represent 2015. The difference in colour is supposed to allow that change to be obvious and the viewer should be able to group similar coloured points into their respective years. This is aided further with the lines which connect them, making this idea quite obvious to understand. Again, the line lengths (similar to the arrow lengths in the last plot) denote the magnitude of chance between 2010 and 2015. I believe I adjusted the width of this plot perfectly to capture those magnitudes honestly within this context. Another important decision which greatly improves the readability of this plot was to order each country in terms of starting values in 2010. This ordering makes it easy to see which countries are above or below another and relative changes between countries.  
+
+The actual values being visualized have to do with an important developmental indicator: percentage of population with access to electricity in Sub-Saharan Africa. You can see that some countries, like Kenya and Swaziland, have made very large progress in improving access to electricity from 2010 to 2015. On the other hand, countries like Char and Madagascar have made very little over five years. Zimbabwe was actually worse off in 2015 than it was in 2010 in this regard. Ghana had the highest percentage of population with access to electricity in 2015, while Burundi had the lowest. 
+  
+
+# Treatment of communicable disease in low income countries - strongest in Afghanistan, weakest in Malawi
+```{r, echo = F, cache=T}
+### inequality
+# correlate contraceptive and disease
+fem.disease.data <- fem.disease.data %>%
+                                select(Country.Name, `2015`)
+
+fem.disease.data <- fem.disease.data[1:217, ]
+
+#africa.disease <- fem.disease.data %>%
+#                        filter(Country.Name %in% subSaharan.africa)
+
+# dot plot with dotted segment
+#ggplot(africa.disease, aes(x=reorder(Country.Name, `2015`), y=`2015`)) + 
+#        geom_point(col="chartreuse4", size=3) +   
+#        geom_segment(aes(x=Country.Name,     # draw actual dots across
+#                         xend=Country.Name, 
+#                         y=min(`2015`)-5, 
+#                         yend=max(`2015`)+5), 
+#                     linetype="dotted", 
+#                     size=0.15,
+#                     color = "darkgrey") +   # Draw dashed lines
+#        labs(title="Female death rates from communicable diseases",
+#             subtitle = "ages 15 - 34",
+#             x="",
+#             y = "\nDeaths due to disease (% of age group)") +  
+#        theme_tufte()+
+#        theme(plot.title = element_text(size=14,  family = "Calibri (Body)"),
+#              plot.subtitle = element_text(size=10,  family = "Calibri (Body)"),
+#              plot.caption = element_text(size=8,  family = "Calibri (Body)"),
+#              axis.text.x = element_text(size=10,  family = "Calibri (Body)"),
+#              axis.text.y = element_text(size=10,  family = "Calibri (Body)"),
+#              axis.title = element_text(size=11,  family = "Calibri (Body)"),
+#              legend.position = "none") +
+#        coord_flip() # flip coords
+
+
+
+low.income.disease <- fem.disease.data %>%
+        filter(Country.Name %in% low.income)
+
+
+```
+```{r, echo=F, cache = T, fig.width=7, fig.height=10}
+
+# dot plot with dotted segment
+ggplot(low.income.disease, aes(x=reorder(Country.Name, `2015`), y=`2015`)) + 
+        geom_point(col="red2", size=3) +   
+        geom_segment(aes(x=Country.Name,     # draw actual dots across
+                         xend=Country.Name, 
+                         y=min(`2015`)-5, 
+                         yend=max(`2015`)+5), 
+                     linetype="dotted", 
+                     size=0.15,
+                     color = "darkgrey") +   # Draw dashed lines
+        labs(title="Female death rates from communicable diseases in\n low income countries",
+             subtitle = "ages 15 - 34",
+             x="",
+             y = "\nDeaths due to disease (% of age group)") +  
+        theme_tufte()+
+        theme(plot.title = element_text(size=14,  family = "Calibri (Body)"),
+              plot.subtitle = element_text(size=10,  family = "Calibri (Body)"),
+              plot.caption = element_text(size=8,  family = "Calibri (Body)"),
+              axis.text.x = element_text(size=10,  family = "Calibri (Body)"),
+              axis.text.y = element_text(size=10,  family = "Calibri (Body)"),
+              axis.title = element_text(size=11,  family = "Calibri (Body)"),
+              legend.position = "none") +
+        coord_flip() # flip coords
+
+```
+  
+This visualization also shows a ranking relationship, but in a simpler way. This time, there is only one measurement per country. I chose to plot this relationship as an ordered dot plot because I think it is the most effective way to show a ranking relationship across many items. The plot looks at how well different low-income countries deal with communicable diseases in terms of death rates. Observations are taken from people ages 15-34 years of age. Countries towards the top of the plot have the highest death rates due to disease, where countries towards the bottom of the plot have the lowest. Malawi, South Sudan, Somalia, and Siberia all have the highest rates of deaths from communicable disease in this age group. Of all the low-income countries, Nepal, Haiti, and Afghanistan have by far the lowest rates of deaths by communicable disease, with Afghanistan having the lowest overall. 
+  	
+  	  
+# Proportion of female employers in Europe have increased overall, but not everywhere
+```{r, echo = F, cache=T}
+#fem.employers.data
+# use high income countries
+
+fem.employers.data <- fem.employers.data %>%
+                        select(Country.Name, `2008`, `2017`) %>%
+                        filter(Country.Name %in% eu.centralAsia) %>%
+                        drop_na()
+
+# to drop
+drop.counts <- c("Tajikistan",
+                 "Moldova",
+                 "Romania",
+                 "Georgia",
+                 "Cyprus",
+                 "Albania",
+                 "Macedonia, FYR",
+                 "Uzbekistan",
+                 "Slovak Republic",
+                 "Channel Islands",
+                 "Kyrgyz Republic",
+                 "Turkmenistan",
+                 "Belarus")
+# drop
+fem.employers.data<- fem.employers.data %>% 
+                        filter(!is.element(Country.Name, drop.counts))
+fem.employers.data2<- fem.employers.data %>%
+                        arrange(`2017`) %>%
+                        mutate(Country.Name = factor(Country.Name, Country.Name))
+
+big.changes <- c("Bosnia and Herzegovina", "Ukraine")
+big.changes2 <- c("Azerbaijan", "Luxembourg")
+
+# 2008
+fem.employers.data3 <- fem.employers.data %>%
+        arrange(`2008`) %>%
+        mutate(Country.Name = factor(Country.Name, Country.Name))
+```
+```{r, eval = T, echo=F, cache = T, fig.width=14, fig.height=8}
+
+q1 <- ggplot(fem.employers.data3, aes(Country.Name, y=`2008`)) +
+        geom_segment( aes(x=Country.Name, 
+                          xend=Country.Name, 
+                          y=0,
+                          yend=`2008`), 
+                      color=ifelse(fem.employers.data3$Country.Name %in% big.changes | fem.employers.data3$Country.Name %in% big.changes2, "orange", "grey70"), 
+                      size=ifelse(fem.employers.data3$Country.Name %in% big.changes | fem.employers.data3$Country.Name %in% big.changes2, 1.3, 0.7) ) +
+        geom_point( color=ifelse(fem.employers.data3$Country.Name %in% big.changes | fem.employers.data3$Country.Name %in% big.changes2, "orange", "grey70"), 
+                    size=ifelse(fem.employers.data3$Country.Name %in% big.changes | fem.employers.data3$Country.Name %in% big.changes2, 5, 2) ) +
+        labs(title = "Proportion of female employers of all working females - 2008",
+             subtitle = "Europe and Central Asia",
+             x= "",
+             y= "Female employers (% of female employment)") +
+        theme_light() +
+        coord_flip() +
+        theme(
+                legend.position="none",
+                panel.grid.major.y = element_blank(),
+                panel.border = element_blank(),
+                axis.ticks.y = element_blank()
+        )
+
+
+fem.employers.data3 <- fem.employers.data %>%
+        arrange(`2017`)
+
+#2017
+q2 <- ggplot(fem.employers.data2, aes(x=Country.Name,`2017`, y=`2017`)) +
+        geom_segment( aes(x=Country.Name, 
+                          xend=Country.Name, 
+                          y=0, 
+                          yend=`2017` ), 
+                      color=ifelse(fem.employers.data2$Country.Name %in% big.changes2, "chartreuse4", 
+                                   ifelse(fem.employers.data2$Country.Name %in% big.changes, "tomato", "grey70")), 
+                      size=ifelse(fem.employers.data2$Country.Name %in% big.changes | fem.employers.data2$Country.Name %in% big.changes2, 1.3, 0.7) ) +
+        geom_point( color=ifelse(fem.employers.data2$Country.Name %in% big.changes2, "chartreuse4", 
+                                 ifelse(fem.employers.data2$Country.Name %in% big.changes, "tomato", "grey70")), 
+                    size=ifelse(fem.employers.data2$Country.Name %in% big.changes | fem.employers.data2$Country.Name %in% big.changes2, 5, 2) ) +
+        labs(title = "Proportion of female employers of all working females - 2017",
+             subtitle = "Europe and Central Asia",
+             x= "",
+             y= "Female employers (% of female employment)") +
+        theme_light() +
+        coord_flip() +
+        theme(
+                legend.position="none",
+                panel.grid.major.y = element_blank(),
+                panel.border = element_blank(),
+                axis.ticks.y = element_blank()
+        )
+#grid.arrange(p3, p4, ncol = 2)
+
+
+#male.employers.data
+
+grid.arrange(q1, q2, nrow = 1)
+
+
+```
+```{r, eval = F, echo=F, cache = T, fig.width=8, fig.height=8}
+
+fem.employers.data3 <- fem.employers.data %>%
+        arrange(`2017`)
+
+#2017
+ggplot(fem.employers.data2, aes(x=Country.Name,`2017`, y=`2017`)) +
+        geom_segment( aes(x=Country.Name, 
+                          xend=Country.Name, 
+                          y=0, 
+                          yend=`2017` ), 
+                      color=ifelse(fem.employers.data2$Country.Name %in% big.changes2, "chartreuse4", 
+                                   ifelse(fem.employers.data2$Country.Name %in% big.changes, "tomato", "grey70")), 
+                      size=ifelse(fem.employers.data2$Country.Name %in% big.changes | fem.employers.data2$Country.Name %in% big.changes2, 1.3, 0.7) ) +
+        geom_point( color=ifelse(fem.employers.data2$Country.Name %in% big.changes2, "chartreuse4", 
+                                 ifelse(fem.employers.data2$Country.Name %in% big.changes, "tomato", "grey70")), 
+                    size=ifelse(fem.employers.data2$Country.Name %in% big.changes | fem.employers.data2$Country.Name %in% big.changes2, 5, 2) ) +
+        labs(title = "Proportion of female employers of all working females - 2017",
+             subtitle = "Europe and Central Asia",
+             x= "",
+             y= "Female employers (% of female employment)") +
+        theme_light() +
+        coord_flip() +
+        theme(
+                legend.position="none",
+                panel.grid.major.y = element_blank(),
+                panel.border = element_blank(),
+                axis.ticks.y = element_blank()
+        )
+#grid.arrange(p3, p4, ncol = 2)
+
+
+#male.employers.data
+```
+  
+These two plots are meant to be viewed together and are very much an extension of the plot above. Here, instead of using y-axis grid lines, I am using line segments extending out from each country. I wanted to do this to better compare some key changes between the two years plotted. Using the line segments over simple dots makes it easier to see and appreciate changes. This is accomplished by incorporating the length of the lines and the 2D position of the dots to give a greater visual weight to each object. These plots accomplish the desired ranking within each plot and comparison between each plot. The ordering accomplishes the ranking which the colour and size of the graphical objects accomplishes the comparison. The countries which are highlighted have larger dots and thicker line segments, which the countries which are not highlighted have smaller, light grey dots and lines which fade into the background just enough to better emphasize the highlighted countries. In terms of the actual choice in colours I made, it was very deliberate. In the left plot, I chose an orange-yellow simply to tell the reader that these four countries I want to highlight in some where. In the right most plot, I highlighted those same four countries but now with colours which denote whether the country improved or not since the year plotted to the left. Green indicates and improvement while red indicates getting worse.  
+
+The plot visualizes the proportion of female employers in Europe in 2008 and again in 2017. Specifically, out of all employed females, the data gives numbers on the proportion which are employers themselves (it is not a proportion of all employers which would include males). One observation is that the proportion of female employers has increased overall from 2008 t 2017. The length of each line segment gives this away, the segments are longer within the 2017 almost across the board meaning the proportion of female employers has increased on average. Of the highlighted countries, Ukraine and Bosnia have seen a large drop in the proportion of female employers between 2008 and 2007. On the other hand, Azerbaijan and Luxemburg have seen large increases since 2008. 
+  
+   
+ 
+# Global life expectancy steadily increasing 
+
+```{r, echo = F, cache=T}
+### World populations
+
+#world.pop.data
+
+
+
+
+### Human development index
+
+#  do the scatters with bubbles
+
+
+
+
+
+### Life expectancy 
+
+
+# new file
+life.expectancy <- read.csv("C:\\Desktop\\Data vis project\\Data_vis_project\\world bank data\\world development indicators\\life-expectancy-globally-since-1770.csv", header = T)
+# fix names
+life.names <- c("Country", "Code", "Year", "L.expectancy")
+names(life.expectancy) <- life.names
+# subset
+life.expectancy <- life.expectancy[ , c(1,3,4)]
+
+life.expectancy <- life.expectancy[1:134, ]
+```
+```{r, echo=F, cache = T, fig.width=12, fig.height=6}
+# line plot
+ggplot(life.expectancy, aes(x=Year, y=L.expectancy, group=Country, color = Country)) +
+        geom_line(size = 0.8) + 
+        scale_y_continuous(limits = c(26, 100), breaks = seq(25, 85, 15)) +
+        scale_x_continuous( breaks = c(1800, 1850, 1900, 1950, 2000)) +
+        labs( title = "Global life expectancy",
+              subtitle = "1770 - 2015\n",
+              x = "", 
+              y = "Life expectancy (in years)\n") +
+        theme_hc() + scale_colour_few() +
+        theme( text = element_text(size=11,  family="Calibri (Body)")) 
+```
+  
+There isn't much to say about this visualization. I wanted to include it because it does a good job showing what it ought to show and, due to the range of measurements, it is clearly shown when different regions began to improve in terms of life expectancy.  Not surprisingly, Africa has consistently the lowest life expectancy of any world region while Europe has the highest. Europe, Oceania, and the Americas started to see big improvements in life expectancy around the 1870's. Likely due to some medical breakthroughs. Asia and the Soviet Union took longer to see similar improvements, around 1910. Africa's life expectancy began to rise above an age of about 26 years old in about the 1930's. The Soviet Union saw a significant drop in life expectancy around 1970. 
+  
+ 
+
+# Life expectancy very high in Europe and Central Asia, inconsistent in East Asia and the Pacific
+```{r, echo = F, cache=T}
+# distribution plot
+
+country.life.expectancy <- read.csv("C:\\Desktop\\Data vis project\\Data_vis_project\\world bank data\\world development indicators\\life-expectancy.csv", header = T)
+life.names <- c("Country", "Code", "Year", "L.expectancy")
+names(country.life.expectancy) <- life.names
+
+
+# "south.asia"
+# "eu.centralAsia"
+# "midEast.northAfr"
+# "eastAsia.pacific"
+# "subSaharan.africa"
+# "latinAm.caribbean"
+# "north.America"
+
+country.life.expectancy <- country.life.expectancy %>%
+                                        filter(Year == 2015,
+                                               Country %in% south.asia | Country %in% eu.centralAsia | Country %in% midEast.northAfr |
+                                               Country %in%  eastAsia.pacific |  Country %in% subSaharan.africa |  Country %in% latinAm.caribbean)
+
+# apply the custom function to assign regions
+country.life.expectancy$region <- sapply(
+        country.life.expectancy$Country, country.life.expectancy$region, 
+        FUN = get.regions
+)
+
+
+```
+```{r, echo=F, cache = T, fig.width=12, fig.height=6, message=F, warning=F}
+ggplot(country.life.expectancy, aes(x=reorder(region, L.expectancy), y=L.expectancy, fill=region)) +
+        geom_violin(alpha=0.6) +
+        labs( x = "",
+              fill = "Region\n",
+              y = "Life expectancy (in years)\n",
+              title = "Regional life expectancy",
+              subtitle = "2015") +
+        theme_minimal()+ 
+        theme(text = element_text(size=11,  family="Calibri (Body)")) +
+        scale_color_few()
+```
+  
+This visualization looks at life expectancy from a different angle, this time as a distribution within a single year (2015). The distributions are also ordered left to right from lowest to highest average life expectancy. Again, Europe had the highest life expectancy in 2015 while Africa had the lowest. The degree to which these regional life expectancies are centered and spread around their mean is also visible. The three regions with the highest average life expectancy, also have the most consistent life expectancies in terms of how centered their distributions are. The regions with lower average life expectancies have more spread distributions. I chose to use a violin plot to see this relationship more clearly.   
+    
+  
+  
+# Regional Human Development Index scores
+```{r, echo = F, cache=T}
+        
+        
+### Human development index
+
+#  do the scatters with bubbles
+        
+human.development <- read.csv("C:\\Desktop\\Data vis project\\Data_vis_project\\world bank data\\world development indicators\\hdi-vs-gdp-per-capita.csv", header = T)        
+
+human.names<- c("Country.Name", "Code", "Year", "HDI", "GDP", "Population")
+
+names(human.development) <- human.names
+        
+# firx encoding
+human.development$Country.Name <- sub("â???T", "'", human.development$Country.Name)
+
+# apply the custom function to assign regions
+human.development$region <- sapply(
+      human.development$Country.Name, human.development2$region, 
+      FUN = get.regions
+)        
+
+# make factor
+human.development$region <- as.factor(human.development$region)
+# drop na
+human.development <- human.development %>%
+                        drop_na(region)
+      
+      
+human.development <- human.development %>% 
+      filter(Year == 2010) %>%
+      drop_na()
+      
+      
+options(scipen = 999)
+
+```
+```{r, echo=F, cache = T, fig.width=12, fig.height=6, message=F, warning=F}
+# log GDP axis
+( hd_1 <- ggplot(human.development, aes(log(GDP), HDI, size = Population, color = region)) +
+            geom_point(alpha=0.6) +
+            scale_size_continuous(breaks=c(1000000, 10000000, 100000000, 500000000, 1000000000), 
+                                  labels = c("1 million", "10 million", "100 million","500 million", "1 billion"), 
+                                  range=c(1, 20)) +
+            labs( size = "population",
+                  x = "\nlog GDP per capita (international-$)\n",
+                  y = "Human Development Index (HDI)\n",
+                  title = "Human Development Index (HDI) vs. log GDP per capita",
+                  subtitle = "2015\n") +
+            theme_minimal() +
+            theme(
+                  text = element_text(size=10,  family="Calibri (Body)"),
+                  title = element_text(size=14,  family = "Calibri (Body)"),
+                  axis.text.x = element_text(size=10,  family = "Calibri (Body)"),
+                  axis.text.y = element_text(size=10,  family = "Calibri (Body)"),
+                  axis.title = element_text(size=12,  family = "Calibri (Body)"),
+                  panel.border = element_blank()
+            ) +
+            guides(colour = guide_legend(override.aes = list(size=10)))+ 
+            #scale_size_manual(values=c(1000000,500000000,1000000000), labels = c("1 million","500 million","1 billion")) +
+            scale_color_few() )
+
+
+
+# linear GDP axis
+( hd_2 <- ggplot(human.development, aes(GDP, HDI, size = Population, color = region)) +
+      geom_point(alpha=0.6) +
+      scale_size_continuous(breaks=c(1000000, 10000000, 100000000, 500000000, 1000000000), 
+                            labels = c("1 million", "10 million", "100 million","500 million", "1 billion"), 
+                            range=c(1, 20)) +
+      labs( size = "population",
+            x = "\n GDP per capita (international-$)\n",
+            y = "Human Development Index (HDI)\n",
+            title = "Human Development Index (HDI) vs. GDP per capita",
+            subtitle = "2015\n") +
+      theme_minimal() +
+      theme(
+            text = element_text(size=10,  family="Calibri (Body)"),
+            title = element_text(size=14,  family = "Calibri (Body)"),
+            axis.text.x = element_text(size=10,  family = "Calibri (Body)"),
+            axis.text.y = element_text(size=10,  family = "Calibri (Body)"),
+            axis.title = element_text(size=12,  family = "Calibri (Body)"),
+            panel.border = element_blank()
+      ) +
+      guides(colour = guide_legend(override.aes = list(size=10)))+ 
+      #scale_size_manual(values=c(1000000,500000000,1000000000), labels = c("1 million","500 million","1 billion")) +
+      scale_color_few() )
+
+
+```
+  
+Human development index scores versus Gross Domestic Product per capita of a subset of countries from different regions are plotted above. Not only is region mapped to the colour of the data points, but the size of each data point is also mapped to the population size of the country. Mapping attributes this way across two correlated measures serves the purpose of allowing the viewer to see how regions cluster together, as well as how some countries may be dissimilar to others in their region in terms of HDI and GDP. The lower plot uses a non-transformed GDP scale and it can be seen that a huge outlier is shifting the entire plot to make the actual regional relationship between HDI and GDP look very different. After converting the GDP scale to a log scale, the relationship is easier to see. Most regions are quite similar in terms of HDI vs GDP. This makes sense because they are two significant and related developmental indicators. There are some interesting countries which stand apart from their respective regions. This is one plot where choosing print-friendliness rather than interactivity might take away from the display. It is also interesting that the size of the country doesn't seem to be related much to HDI nor GDP. There does not appear to be any size clusters in this display. 
+
+  
+
+
+
+# A closer look at the Human Development Index
+```{r, echo=F, cache = T, fig.width=13, fig.height=15, message=F, warning=F}
+## dot plots of HDI regionally 
+library(grid)
+
+# north america
+#d1 <- human.development %>%
+#      filter(Country.Name %in% north.America) %>%
+#      ggplot(., aes(x = HDI, y = 1, label = Country.Name)) +
+#      geom_point(color = "purple", position = "dodge", size = 2.5) +
+#      geom_text_repel(
+#            nudge_y      = 0.03,
+#            #direction    = "x",
+#            angle        = 90,
+#            #vjust        = 0,
+#            segment.size = 0.2
+#      ) +
+#      annotate("text", x = 0.1, y = 0.81, label = "North America", size = 5, colour = "grey35") +
+#      labs(x = NULL) +
+#      #xlim(0, 1) +
+#      ylim(1, 0.8) +
+#      theme_tufte()+
+#      scale_x_continuous(limits = c(0, 1), expand = c(0,0)) + 
+#      theme(
+#            text = element_text(size=12,  family="Calibri (Body)"),
+#            axis.line.x = element_line(color="grey35", size = 0.5),
+#            axis.line.y  = element_blank(),
+#            axis.ticks.y = element_blank(),
+#            axis.text.y  = element_blank(),
+#            axis.title.y = element_blank()
+#      )
+
+
+
+# europe and central asia
+#d2<- human.development %>%
+#      filter(Country.Name %in% eu.centralAsia) %>%
+#      ggplot(., aes(x = HDI, y = 1, label = Country.Name)) +
+#      geom_point(color = "dodgerblue2", position = "dodge", size = 2.5) +
+#      geom_text_repel(
+#            size = 4,
+#            nudge_y      = 0.07,
+#            #direction    = "x",
+#            angle        = 90,
+#            #vjust        = 0,
+#            segment.size = 0.2,
+#            segment.alpha = 0.5
+#      ) +
+#      annotate("text", x = 0.1, y = 0.81, label = "EU and Central Asia", size = 5, colour = "grey35") +
+#      labs(x = NULL) +
+#      xlim(0, 1) +
+#      ylim(1, 0.8) +
+#      theme_tufte()+
+#      theme(
+#            text = element_text(size=12,  family="Calibri (Body)"),
+#            axis.line.y  = element_blank(),
+#            axis.ticks.y = element_blank(),
+#            axis.text.y  = element_blank(),
+#            axis.title.y = element_blank()
+#      )
+
+
+# east asia and pacific
+d3 <- human.development %>%
+      filter(Country.Name %in% eastAsia.pacific) %>%
+      ggplot(., aes(x = HDI, y = 1, label = Country.Name)) +
+      geom_point(color = "palegreen4", position = "dodge", size = 3.2) +
+      geom_text_repel(
+            size = 4,
+            nudge_y      = 0.03,
+            #direction    = "x",
+            angle        = 90,
+            #vjust        = 0,
+            segment.size = 0.2,
+            segment.alpha = 0.5
+      ) +
+      annotate("text", x = 0.08, y = 0.91, label = "East Asia and Pacific", size = 5, colour = "grey35") +
+      labs(x = NULL) +
+      xlim(0, 1) +
+      ylim(1, 0.9) +
+      theme_tufte()+
+      theme(
+            text = element_text(size=12,  family="Calibri (Body)"),
+            axis.line.x = element_line(color="grey35", size = 0.4),
+            axis.line.y  = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y  = element_blank(),
+            axis.title.y = element_blank()
+      )
+
+# latin america and caribean
+d4 <- human.development %>%
+      filter(Country.Name %in% latinAm.caribbean) %>%
+      ggplot(., aes(x = HDI, y = 1, label = Country.Name)) +
+            geom_point(color = "tomato", position = "dodge", size = 3.2) +
+            geom_text_repel(
+                  size = 4,
+                  nudge_y      = 0.04,
+                  #direction    = "x",
+                  angle        = 90,
+                  #vjust        = 0,
+                  segment.size = 0.2,
+                  segment.alpha = 0.5
+            ) +
+            annotate("text", x = 0.1, y = 0.91, label = "Latin America and Caribbean", size = 5, colour = "grey35") +
+            labs(x = NULL) +
+            xlim(0, 1) +
+            ylim(1, 0.9) +
+            theme_tufte()+
+            theme(
+                  text = element_text(size=12,  family="Calibri (Body)"),
+                  axis.line.x = element_line(color="grey35", size = 0.4),
+                  axis.line.y  = element_blank(),
+                  axis.ticks.y = element_blank(),
+                  axis.text.y  = element_blank(),
+                  axis.title.y = element_blank()
+            )
+
+
+# "midEast.northAfr"
+
+d5 <- human.development %>%
+      filter(Country.Name %in% midEast.northAfr) %>%
+      ggplot(., aes(x = HDI, y = 1, label = Country.Name)) +
+      geom_point(color = "dodgerblue2", position = "dodge", size = 3.2) +
+      geom_text_repel(
+            size = 4,
+            nudge_y      = 0.03,
+            #direction    = "x",
+            angle        = 90,
+            #vjust        = 0,
+            segment.size = 0.2,
+            segment.alpha = 0.5
+      ) +
+      annotate("text", x = 0.1, y = 0.91, label = "Middle East and North Africa", size = 5, colour = "grey35") +
+      labs(x = NULL) +
+      xlim(0, 1) +
+      ylim(1, 0.9) +
+      theme_tufte()+
+      theme(
+            text = element_text(size=12,  family="Calibri (Body)"),
+            axis.line.x = element_line(color="grey35", size = 0.4),
+            axis.line.y  = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y  = element_blank(),
+            axis.title.y = element_blank()
+      )
+
+
+# "south.asia"
+
+d6 <- human.development %>%
+      filter(Country.Name %in% south.asia) %>%
+      ggplot(., aes(x = HDI, y = 1, label = Country.Name)) +
+      geom_point(color = "red3", position = "dodge", size = 3.2) +
+      geom_text_repel(
+            size = 4,
+            nudge_y      = 0.03,
+            #direction    = "x",
+            angle        = 90,
+            #vjust        = 0,
+            segment.size = 0.2,
+            segment.alpha = 0.5
+      ) +
+      annotate("text", x = 0.05, y = 0.91, label = "South Asia", size = 5, colour = "grey35") +
+      labs(x = NULL) +
+      xlim(0, 1) +
+      ylim(1, 0.9) +
+      theme_tufte()+
+      theme(
+            text = element_text(size=12,  family="Calibri (Body)"),
+            axis.line.x = element_line(color="grey35", size = 0.4),
+            axis.line.y  = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y  = element_blank(),
+            axis.title.y = element_blank()
+      )
+
+
+
+# grid.arrange vertically
+title <- textGrob("\nRegional Human Development Index scores (2015)\n\n", gp=gpar(fontsize=20))
+bottitle <- textGrob("\n\nHuman Development Index (HDI)\n", gp=gpar(fontsize=16))
+
+grid.arrange(d3, d4, d5, d6,
+             ncol = 1, 
+             top = title,
+              bottom = bottitle)
+```
+  
+Sticking with the multiple perspectives theme, this plot is a different take on Human Development Index scores. I arrived at this plot through a lot of experimentation with R; it is a plot which I believe is completely unique (but I may be wrong). What makes this plot simple yet unique is that I have grouped each region into its own quarter of the plot (vertically) and visualized each group across a single dimension. Vertical grouping works seamlessly here because there is no y-axis included. When planning this plot, I thought about how I might deconstruct a scatter plot to allow for a single dimension. A dot-plot would be too difficult to interpret with all groups included and encoded with colours. Furthermore, I couldn't find an existing plot which nailed both colour and 2-D position along the x-axis the way I wanted. This custom plot allows the viewer to see each unique data point with no overlap or jittering required. Because each region shares the same scale, relative comparisons between positions can be made easily both within and between regions. This plot allows viewers to see the top and bottom country in all regions and overall (in terms of HDI) and it also points out around which values each region is spread across in terms of HDI. The only cluttering issue I ran into involved the ability to include labels for each data point (keeping with a print-friendly theme). This was solved by simply repelling the labels away from each data point and jittering the labels rather than the data points themselves (as the labels take up more room on the plot). 
+
+  
+
+# Female school enrollment (% of gross)
+
+```{r, echo=F, cache = T, fig.width=10, fig.height=10}
+
+# Make the plot
+ggplot(data, aes(x=as.factor(id), y=enrollment, fill=ed.level)) +     
+        
+        geom_bar(aes(x=as.factor(id), y=enrollment, fill=ed.level), stat="identity", alpha=0.5, colour="darkgrey") +
+        
+        # Add a val=100/75/50/25 lines. I do it at the beginning to make sure barplots are OVER it.
+        geom_segment(data=grid_data, aes(x = end, y = 80, xend = start, yend = 80), 
+                     colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+        geom_segment(data=grid_data, aes(x = end, y = 60, xend = start, yend = 60), 
+                     colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+        geom_segment(data=grid_data, aes(x = end, y = 40, xend = start, yend = 40), 
+                     colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+        geom_segment(data=grid_data, aes(x = end, y = 20, xend = start, yend = 20), 
+                     colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+        
+        # Add text showing the value of each 100/75/50/25 lines
+        annotate("text", x = rep(max(data$id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , 
+                 color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
+        
+        geom_bar(aes(x=as.factor(id), y=enrollment, fill=ed.level), stat="identity", alpha=0.5) +
+        ylim(-100,120) +
+        theme_minimal() +
+        theme(
+                legend.position = "none",
+                axis.text = element_blank(),
+                axis.title = element_blank(),
+                panel.grid = element_blank(),
+                plot.margin = unit(rep(-1,4), "cm") 
+             ) +
+        coord_polar() + 
+        geom_text(data=label_data, aes(x=id, y=enrollment+10, label=region, hjust=hjust), color="black", fontface="bold",alpha=0.6, size=2.5, angle= label_data$angle, inherit.aes = FALSE ) +
+        
+        # Add base line information
+        geom_segment(data=base_data, aes(x = start, y = -5, xend = end, yend = -5), 
+                     colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
+        geom_text(data=base_data, aes(x = title, y = -18, label=ed.level), hjust=c(1,1,0,0), 
+                  colour = "black", alpha=0.8, size=4, fontface="bold", inherit.aes = FALSE) +
+        scale_fill_few()
+
+#ggplotly(p)
+
+```
+  
+This plot represents an interesting looking, eye-catching, yet ineffective plot. I wanted to include one such plot to highlight why eye-catching plots are often poorly designed and not very valuable in terms of the knowledge they convey. This plot simply visualizes female educational enrollment rates at different levels of education across regions of the world. Because the coordinates of this plot are polar (wrapping around in a circle), comparisons made within education levels are quite difficult and not accurate while comparisons made between education levels are almost impossible. One reason why this is the case is that these sub-plots do not share a common starting point for each bar. Instead, each bar starts at a different place around the inner circle. This makes it hard to gage relative heights of each bar, and thus, their relative values. Another weakness which makes interpreting this plot difficult is that it uses one y-axis scale for each of the four plots. This is made slightly better by the fact that there are horizontal line segments between each plot to denote those y-values. Overall, this plot looks interesting but is not very informative. 
+
